@@ -175,8 +175,8 @@ public class chessBoard extends JPanel{
                 selectedCell=null;
             }
             else if(current.getPlaceable()){
+                specialAction action = wasSpecialAction(current, selectedCell);
                 
-				specialAction action = wasSpecialAction(current, selectedCell);
                 current.currentPiece = selectedCell.currentPiece;
                 
                 unsetMovable(selectedCell);
