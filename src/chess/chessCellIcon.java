@@ -3,13 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package chessBoard;
+package chess;
 
-import java.awt.AlphaComposite;
 import java.awt.Component;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
 import javax.swing.ImageIcon;
 import javax.swing.Icon;
 /**
@@ -21,14 +18,14 @@ public class chessCellIcon implements Icon{
     private ImageIcon cell;
     private ImageIcon piece;
     private Boolean pieceSet = false;
-    chessCellIcon(cellColor cellC, pieceType pieceT, pieceColor pieceC){
+    chessCellIcon(cellColor cellC, pieceType pieceT, pieceColor pieceC, int size){
         String cellIcon = "/tile_" + cellC.name()+".png";
-        cell = new ImageIcon(new ImageIcon(getClass().getResource(cellIcon)).getImage().getScaledInstance(global.size, global.size, java.awt.Image.SCALE_SMOOTH));
+        cell = new ImageIcon(new ImageIcon(getClass().getResource(cellIcon)).getImage().getScaledInstance(size, size, java.awt.Image.SCALE_SMOOTH));
         
         if (!pieceT.name().equals("NULL")){
             pieceSet=true;
             String pieceIcon = "/"+pieceT.name()+"_"+pieceC.toString()+".png";
-            piece = new ImageIcon(new ImageIcon(getClass().getResource(pieceIcon)).getImage().getScaledInstance(global.size, global.size, java.awt.Image.SCALE_SMOOTH));
+            piece = new ImageIcon(new ImageIcon(getClass().getResource(pieceIcon)).getImage().getScaledInstance(size, size, java.awt.Image.SCALE_SMOOTH));
         }
     }
     @Override

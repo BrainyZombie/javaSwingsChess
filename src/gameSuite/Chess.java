@@ -3,8 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package chess;
-import chessBoard.chessBoard;
+package gameSuite;
+import chess.chessBoard;
 import javax.swing.JFrame;
 
 
@@ -22,7 +22,7 @@ public class Chess {
         JFrame window = new JFrame("Chess");
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
-        window.add(new chessBoard(200));
+        window.add(new chessBoard(80));
         window.pack();
         window.setVisible(true);
     }

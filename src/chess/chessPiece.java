@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package chessBoard;
+package chess;
 
 import java.util.ArrayList;
 
@@ -45,6 +45,27 @@ abstract class chessPiece {
         setMoves();
     }
     
+    public chessPiece(chessPiece c, cell cell) {
+        this.pieceC = c.pieceC;
+        this.pieceT = c.pieceT;
+        
+        if (pieceC.name().equals("blue")){
+            baseCellColor = cellColor.blue;
+        }
+        else{
+            baseCellColor = cellColor.yellow;
+        }
+        
+        hoverCellColor = cellColor.green;
+        hoverInvalidCellColor=cellColor.red;
+        movableSelectedCellColor = cellColor.red;
+        
+        this.movesAllowed = new ArrayList<pieceMove>(c.movesAllowed);
+        this.specialMoves = new ArrayList<specialAction>(c.specialMoves);
+        
+        currentCell = cell;
+    }
+    
     void setCell(cell cell){
         currentCell = cell;
     }
@@ -57,6 +78,10 @@ class pawn extends chessPiece{
         pieceT=pieceType.pawn;
     }
     
+    public pawn(pawn c, cell cell) {
+        super(c, cell);
+        hasMoved = c.hasMoved;
+    }
     @Override
     void setMoves(){
         movesAllowed.add(new pieceMove(0,1,moveType.cannotCapture));
@@ -64,15 +89,48 @@ class pawn extends chessPiece{
         movesAllowed.add(new pieceMove(-1,1,moveType.onlyCapture));
         specialMoves.add(new pawnDouble(this));
     }
+    @Override
     void onMove(){
         hasMoved=true;
     }
+    
+    
+    
+    
+    private class pawnDouble extends specialAction{
+        pawn current;
+        pawnDouble(pawn curr){
+            super(0,2,moveType.cannotCapture);
+            current=curr;
+        }
+        boolean validateAction(){
+            if (current.pieceC.toString() == "blue"){
+                if ( !current.hasMoved && currentCell.currentBoard.cellGrid[current.currentCell.posY - 1][current.currentCell.posX].currentPiece==null)
+                    return true;
+                else
+                    return false;
+            }
+            else{
+                if (currentCell.currentBoard.cellGrid[current.currentCell.posY + 1][current.currentCell.posX].currentPiece==null && !current.hasMoved)
+                    return true;
+                else
+                    return false;
+            }
+        }
+        @Override
+        void postClick(){}   
+    }
+
 }
 
 class rook extends chessPiece{
     rook (pieceColor pieceC, cell cell){
         super(pieceC, cell);
         pieceT=pieceType.rook;
+    }
+
+    public rook(rook c, cell cell) {
+        super(c, cell);
     }
     
     @Override
@@ -89,6 +147,10 @@ class bishop extends chessPiece{
         pieceT=pieceType.bishop;
     }
     
+    public bishop(bishop c, cell cell) {
+        super(c, cell);
+    }
+    
     @Override
     void setMoves(){
         movesAllowed.add(new pieceMove(1,1,moveType.recursive));
@@ -101,6 +163,10 @@ class knight extends chessPiece{
     knight (pieceColor pieceC, cell cell){
         super(pieceC, cell);
         pieceT=pieceType.knight;
+    }
+    
+    public knight(knight c, cell cell) {
+        super(c, cell);
     }
     
     @Override
@@ -120,6 +186,10 @@ class queen extends chessPiece{
     queen (pieceColor pieceC, cell cell){
         super(pieceC, cell);
         pieceT=pieceType.queen;
+    }
+    
+    public queen(queen c, cell cell) {
+        super(c, cell);
     }
     
     @Override
@@ -142,6 +212,10 @@ class king extends chessPiece{
         pieceT=pieceType.king;
     }
     
+    public king(king c, cell cell) {
+        super(c, cell);
+    }
+    
     @Override
     void setMoves(){
         movesAllowed.add(new pieceMove(0,1,moveType.single));
@@ -153,29 +227,5 @@ class king extends chessPiece{
         movesAllowed.add(new pieceMove(-1,1,moveType.single));
         movesAllowed.add(new pieceMove(-1,-1,moveType.single));
     }
-}
-
-class pawnDouble extends specialAction{
-    pawn current;
-    pawnDouble(pawn curr){
-        super(0,2,moveType.cannotCapture);
-        current=curr;
-    }
-    boolean validateAction(){
-        if (current.pieceC.toString() == "blue"){
-            if (global.cellGrid[current.currentCell.posY - 1][current.currentCell.posX].currentPiece==null && !current.hasMoved)
-                return true;
-            else
-                return false;
-        }
-        else{
-            if (global.cellGrid[current.currentCell.posY + 1][current.currentCell.posX].currentPiece==null && !current.hasMoved)
-                return true;
-            else
-                return false;
-        }
-    }
-    @Override
-    void postClick(){}   
 }
 

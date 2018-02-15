@@ -1,5 +1,5 @@
 
-package chessBoard;
+package chess;
 enum cellColor{
     white,
     grey,
