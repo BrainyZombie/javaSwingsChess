@@ -98,7 +98,7 @@ public class chessPlayer {
         
         for (cell i:currentBoard.cellGrid[y][x].attacking){
             temp.currentBoard.duplicate(currentBoard);
-            temp.testMove(temp.currentBoard.cellGrid[y][x], temp.currentBoard.cellGrid[i.posY][i.posX]);
+            temp.doMove(temp.currentBoard.cellGrid[y][x], temp.currentBoard.cellGrid[i.posY][i.posX]);
             temp.detectCheck();
             if (!(temp.currentBoard.currentTurn==pieceColor.yellow?temp.currentBoard.isCheckOnBlue:temp.currentBoard.isCheckOnYellow)){
                 validMoves.add(i);
@@ -192,9 +192,13 @@ public class chessPlayer {
             }
             else if(current.attackedBy.contains(currentBoard.selectedCell)){
                 
+                unsetMovable(currentBoard.selectedCell);
 		doMove(currentBoard.selectedCell, current);
+                currentBoard.selectedCell.setBaseColor();
+                current.setHoverInvalidColor();
                 currentBoard.pieceSelected=false;
                 currentBoard.selectedCell=null;
+                
                 
                 setValidMoves();
                 detectCheck();
@@ -210,20 +214,17 @@ public class chessPlayer {
         }
     }
     
-    final void doMove(cell selectedCell, cell current){
-        specialAction action = wasSpecialAction(current, selectedCell);
-        current.currentPiece = selectedCell.currentPiece;
+    final void doMove(cell moveFrom, cell moveTo){
+        specialAction action = wasSpecialAction(moveTo, moveFrom);
+        moveTo.currentPiece = moveFrom.currentPiece;
         
-        unsetMovable(selectedCell);
-        selectedCell.setAttacking(new ArrayList<>());
-        selectedCell.currentPiece = null;
-        selectedCell.setBaseColor();
-        current.currentPiece.setCell(current);
+        moveFrom.setAttacking(new ArrayList<>());
+        moveFrom.currentPiece = null;
+        moveTo.currentPiece.setCell(moveTo);
         
-        current.setHoverInvalidColor();
         
                 
-        current.currentPiece.onMove();
+        moveTo.currentPiece.onMove();
                 
         if (action!=null)   action.postClick();
         
@@ -236,27 +237,6 @@ public class chessPlayer {
         calculateAttacks();
     }
     
-    
-    final void testMove(cell selectedCell, cell current){
-        specialAction action = wasSpecialAction(current, selectedCell);
-        current.currentPiece = selectedCell.currentPiece;
-        
-        selectedCell.setAttacking(new ArrayList<>());
-        selectedCell.currentPiece = null;
-        current.currentPiece.setCell(current);
-              
-        current.currentPiece.onMove();
-                
-        if (action!=null)   action.postClick();
-        
-        if (currentBoard.currentTurn == pieceColor.blue) {
-            currentBoard.currentTurn  = pieceColor.yellow;                    
-        } else {
-            currentBoard.currentTurn  = pieceColor.blue;
-        }
-                
-        calculateAttacks();
-    }
     final  specialAction wasSpecialAction(cell current, cell selectedCell){
         for (int i=0; i<selectedCell.currentPiece.specialMoves.size(); i++){
                 if(findPossibleMoves(selectedCell, selectedCell.currentPiece.specialMoves.get(i)).contains(current)){
