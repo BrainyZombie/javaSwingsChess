@@ -10,12 +10,14 @@ package chess;
  * @author ashir basu
  */
 
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.util.ArrayList;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 public class cell extends JButton{
-    double aggressiveness =0.75;
-    boolean mouseOver=false;
     boolean placeable = false;
     
     private
@@ -24,14 +26,13 @@ public class cell extends JButton{
     cellColor movableSelectedCellColor = cellColor.green;
     cellColor movableUnselectedCellColor = cellColor.white;
     chessPiece currentPiece;
-    ArrayList<cell> attacking;
+    public ArrayList<cell> attacking ;
     boardState currentBoard;
     int size;
     public 
-    ArrayList<cell> attackedBy = new ArrayList<>();
+    ArrayList<cell> attackedBy ;
     
-    public
-            int posX, posY;
+    public  int posX, posY;
     public cell(int posX, int posY, int size, boardState board){
         super("");
         this.size = size;
@@ -42,26 +43,28 @@ public class cell extends JButton{
         currentPiece = null;
         this.posX=posX;
         this.posY=posY;
-        
         currentBoard=board;
-        
+        attacking = new ArrayList<cell>();
+        attackedBy = new ArrayList<cell>();
+        attacking.clear();
+        attackedBy.clear();
         setBaseColor();
         
     }
     
-    public cell(cell c, boardState board) {
-        currentBoard = board;
-        size = c.size;
-        this.mouseOver = c.mouseOver;
-        this.placeable = c.placeable;
-        this.attacking = new ArrayList<cell>();
-        if(c.attacking != null)
-            this.attacking.addAll(c.attacking);
-        this.attackedBy = new ArrayList<cell>();
-        if(c.attackedBy != null)
-            this.attackedBy.addAll(c.attackedBy);
-        this.posX = c.posX;
-        this.posY = c.posY;
+    public void duplicate(cell c) {
+        attacking.clear();
+        attackedBy.clear();
+        if(!c.attacking.isEmpty()){
+            for (cell i: c.attacking){
+                attacking.add(currentBoard.cellGrid[i.posY][i.posX]);
+            }
+        }
+        if(c.attackedBy != null && !c.attackedBy.isEmpty()){
+            for (cell i: c.attackedBy){
+                attackedBy.add(currentBoard.cellGrid[i.posY][i.posX]);
+            }
+        }
         
         if(c.currentPiece != null)
             switch(c.currentPiece.pieceT)  {
@@ -134,17 +137,18 @@ public class cell extends JButton{
         }
     }
     
-    void setAttacking(ArrayList<cell> list){
-        if (attacking!=null) {
-            for (cell i: attacking){
-                i.attackedBy.remove(this);
-            }
+    void setAttacking(ArrayList<cell> list){    
+        
+        for (cell i: attacking){
+            i.attackedBy.remove(this);
         }
-        attacking = list;
-        if (attacking!=null){
-            for (cell i: attacking){
-                i.attackedBy.add(this);
-            }
+        attacking.clear();
+        if (list!=null&&!list.isEmpty()){
+            attacking.addAll(list);
+        }
+    
+        for (cell i: attacking){
+            i.attackedBy.add(this);
         }
     }
     
@@ -158,5 +162,41 @@ public class cell extends JButton{
     
     final boolean getPlaceable() {
         return this.placeable;
+    }
+    
+    private class chessCellIcon implements Icon{
+        private ImageIcon cell;
+        private ImageIcon piece;
+        private Boolean pieceSet = false;
+        chessCellIcon(cellColor cellC, pieceType pieceT, pieceColor pieceC, int size){
+            String cellIcon = "/tile_" + cellC.name()+".png";
+            cell = new ImageIcon(new ImageIcon(getClass().getResource(cellIcon)).getImage().getScaledInstance(size, size, java.awt.Image.SCALE_SMOOTH));
+        
+            if (!pieceT.name().equals("NULL")){
+                pieceSet=true;
+                String pieceIcon = "/"+pieceT.name()+"_"+pieceC.toString()+".png";
+                piece = new ImageIcon(new ImageIcon(getClass().getResource(pieceIcon)).getImage().getScaledInstance(size, size, java.awt.Image.SCALE_SMOOTH));
+            }
+        }
+        @Override
+        public int getIconHeight() {
+            if (pieceSet)
+                return Math.max(cell.getIconHeight(), piece.getIconHeight());
+            else
+                return cell.getIconHeight();
+        }
+        @Override
+        public int getIconWidth() {
+            if (pieceSet)
+                return Math.max(cell.getIconWidth(), piece.getIconWidth());
+            else
+                return cell.getIconWidth();
+        }
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            cell.paintIcon(c, g, x, y);
+            if (pieceSet)
+                piece.paintIcon(c, g, x, y);
+        }
     }
 }

@@ -22,7 +22,7 @@ public class Chess {
         JFrame window = new JFrame("Chess");
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
-        window.add(new chessBoard(80));
+        window.add(new chessBoard(200));
         window.pack();
         window.setVisible(true);
     }

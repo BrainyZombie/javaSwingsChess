@@ -60,8 +60,8 @@ abstract class chessPiece {
         hoverInvalidCellColor=cellColor.red;
         movableSelectedCellColor = cellColor.red;
         
-        this.movesAllowed = new ArrayList<pieceMove>(c.movesAllowed);
-        this.specialMoves = new ArrayList<specialAction>(c.specialMoves);
+        movesAllowed.addAll(c.movesAllowed);
+        specialMoves.addAll(c.specialMoves);
         
         currentCell = cell;
     }
@@ -104,13 +104,16 @@ class pawn extends chessPiece{
             current=curr;
         }
         boolean validateAction(){
+            
             if (current.pieceC.toString() == "blue"){
+                if (current.currentCell.posY - 1 < 0) return false;
                 if ( !current.hasMoved && currentCell.currentBoard.cellGrid[current.currentCell.posY - 1][current.currentCell.posX].currentPiece==null)
                     return true;
                 else
                     return false;
             }
             else{
+                if (current.currentCell.posY + 1 > 7) return false;
                 if (currentCell.currentBoard.cellGrid[current.currentCell.posY + 1][current.currentCell.posX].currentPiece==null && !current.hasMoved)
                     return true;
                 else
@@ -207,6 +210,7 @@ class queen extends chessPiece{
 
 
 class king extends chessPiece{
+    boolean hasMoved = false;
     king (pieceColor pieceC, cell cell){
         super(pieceC, cell);
         pieceT=pieceType.king;
@@ -214,6 +218,7 @@ class king extends chessPiece{
     
     public king(king c, cell cell) {
         super(c, cell);
+        hasMoved = c.hasMoved;
     }
     
     @Override
@@ -227,5 +232,16 @@ class king extends chessPiece{
         movesAllowed.add(new pieceMove(-1,1,moveType.single));
         movesAllowed.add(new pieceMove(-1,-1,moveType.single));
     }
+    
+    @Override
+    void onMove(){
+        hasMoved=true;
+        if (pieceC==pieceColor.blue)
+            currentCell.currentBoard.kingBlue = currentCell;
+        else
+            currentCell.currentBoard.kingYellow = currentCell;   
+    }
+    
+    
 }
 

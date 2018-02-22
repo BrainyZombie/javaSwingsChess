@@ -18,11 +18,11 @@ import java.util.ArrayList;
 public class chessBoard extends JPanel{ 
     
     private boardState mainBoard;
-    private chessMoveFinder mainBoardHandler;
+    private chessPlayer mainBoardHandler;
     
     public chessBoard(int cellSize) {
         mainBoard = new boardState(cellSize);
-        mainBoardHandler = new chessMoveFinder(mainBoard);
+        mainBoardHandler = new chessPlayer(mainBoard, true);
         GridLayout grid = new GridLayout(8,8,0,0);
         this.setLayout(grid);
         
@@ -44,7 +44,7 @@ public class chessBoard extends JPanel{
                     if (current.currentPiece==null) {
                         current.setHoverColor();
                     } else if (current.currentPiece.pieceC == mainBoard.currentTurn) {
-                        if (setMovableUnselected(current)!=0) {
+                        if (mainBoardHandler.setMovableUnselected(current)!=0) {
                             current.setHoverColor();
                         } else {
                             current.setHoverInvalidColor();
@@ -60,70 +60,12 @@ public class chessBoard extends JPanel{
                     current.setBaseColor();
                     if (current.currentPiece!=null){
                         if (current.currentPiece.pieceC == mainBoard.currentTurn) {
-                            unsetMovable(current);
+                            mainBoardHandler.unsetMovable(current);
                         }
                     }
                 }
             }
-            @Override
-            public void mousePressed(java.awt.event.MouseEvent evt){
-                if (!mainBoard.pieceSelected && current.currentPiece!=null){
-                    if (current.currentPiece.pieceC != mainBoard.currentTurn){
-                        current.setBaseColor();
-                        JOptionPane.showMessageDialog(null,"It is "+mainBoard.currentTurn.name()+"'s turn");
-                        return;
-                    }
-                    else if (current.attacking==null){
-                        current.setBaseColor();
-                        JOptionPane.showMessageDialog(null,"This piece has no valid moves");
-                        return;                        
-                    }
-                    else{
-                        mainBoardHandler.moveHandler(current);
-                    }
-                }
-                else if (mainBoard.pieceSelected){
-                    mainBoardHandler.moveHandler(current);
-                }
-            }
         });
-    }
-    
-    final static int setMovableUnselected(cell current){
-        ArrayList<cell> moves = current.attacking;
-        if (moves==null) {
-            return 0;
-        }
-        for (int i=0;i<moves.size();i++){
-            moves.get(i).setMovableUnselectedColor();
-        }
-        return moves.size();
-    }
-    
-    
-    final static void unsetMovable(cell current){
-        ArrayList<cell> moves = current.attacking;
-        if (moves==null) {
-            return;
-        }
-        for (int i=0;i<moves.size();i++){
-            moves.get(i).setBaseColor();
-            moves.get(i).unsetPlaceable();
-        }
-    }
-    
-    
-    final static int setMovableSelected(cell current){
-        ArrayList<cell> moves = current.attacking;
-        if (moves==null) {
-            return 0;
-        }
-        for (int i=0;i<moves.size();i++){
-            moves.get(i).setMovableSelectedColor();
-            moves.get(i).setPlaceable();
-        }
-        current.setMovableUnselectedColor();
-        return moves.size();
     }
 }
     
