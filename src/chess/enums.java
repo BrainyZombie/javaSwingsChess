@@ -31,6 +31,12 @@ enum moveType{
     onlyCapture
 }
 
+enum specialActionType{
+    elPassant,
+    pawnDouble,
+    castle
+}
+
 class pieceMove{
     public
     int x;
@@ -44,6 +50,7 @@ class pieceMove{
 }
 
 abstract class specialAction extends pieceMove{
+    specialActionType type; 
     specialAction(int x, int y, moveType type){
         super(x, y, type);
     }

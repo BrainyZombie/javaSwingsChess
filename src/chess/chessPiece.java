@@ -61,9 +61,17 @@ abstract class chessPiece {
         movableSelectedCellColor = cellColor.red;
         
         movesAllowed.addAll(c.movesAllowed);
-        specialMoves.addAll(c.specialMoves);
-        
         currentCell = cell;
+        for (specialAction i: c.specialMoves){
+            if (i.type == specialActionType.pawnDouble){
+                specialMoves.add(i);
+            }
+            else if (i.type == specialActionType.castle)
+            {
+                specialMoves.add(new castleRight((king) this, (castle) i));
+            }
+        }
+        
     }
     
     void setCell(cell cell){
@@ -73,6 +81,7 @@ abstract class chessPiece {
 
 class pawn extends chessPiece{
     boolean hasMoved = false;
+    int elPassantableOn = 0;
     pawn (pieceColor pieceC, cell cell){
         super(pieceC, cell);
         pieceT=pieceType.pawn;
@@ -102,6 +111,7 @@ class pawn extends chessPiece{
         pawnDouble(pawn curr){
             super(0,2,moveType.cannotCapture);
             current=curr;
+            type = specialActionType.pawnDouble;
         }
         boolean validateAction(){
             
@@ -121,12 +131,15 @@ class pawn extends chessPiece{
             }
         }
         @Override
-        void postClick(){}   
+        void postClick(){
+            current.elPassantableOn = current.currentCell.currentBoard.moveNumber + 1;
+        }   
     }
 
 }
 
 class rook extends chessPiece{
+    boolean hasMoved = false;
     rook (pieceColor pieceC, cell cell){
         super(pieceC, cell);
         pieceT=pieceType.rook;
@@ -142,6 +155,10 @@ class rook extends chessPiece{
         movesAllowed.add(new pieceMove(0,-1,moveType.recursive));
         movesAllowed.add(new pieceMove(1,0,moveType.recursive));
         movesAllowed.add(new pieceMove(-1,0,moveType.recursive));
+    }
+    @Override
+    void onMove(){
+        hasMoved = true;
     }
 }
 class bishop extends chessPiece{
@@ -219,6 +236,7 @@ class king extends chessPiece{
     public king(king c, cell cell) {
         super(c, cell);
         hasMoved = c.hasMoved;
+        
     }
     
     @Override
@@ -231,6 +249,8 @@ class king extends chessPiece{
         movesAllowed.add(new pieceMove(1,-1,moveType.single));
         movesAllowed.add(new pieceMove(-1,1,moveType.single));
         movesAllowed.add(new pieceMove(-1,-1,moveType.single));
+        specialMoves.add(new castleRight(this));
+        specialMoves.add(new castleLeft(this));
     }
     
     @Override
@@ -241,7 +261,142 @@ class king extends chessPiece{
         else
             currentCell.currentBoard.kingYellow = currentCell;   
     }
-    
-    
 }
 
+
+    abstract class castle extends specialAction{
+        king current;
+        cell castleWith;
+        cell castleTo;
+        cell castleFrom;
+        castle(int x, int y, moveType move, king curr){
+            super(x,y,move);
+            type = specialActionType.castle;
+            current = curr;
+        }
+        castle(int x, int y, moveType move, king curr, castle previous){
+            super(x,y,move);
+            type = specialActionType.castle;
+            current = curr;
+            castleWith = current.currentCell.currentBoard.cellGrid[previous.castleWith.posY][previous.castleWith.posX];
+            castleTo = current.currentCell.currentBoard.cellGrid[previous.castleTo.posY][previous.castleTo.posX];
+            castleFrom = current.currentCell.currentBoard.cellGrid[previous.castleFrom.posY][previous.castleFrom.posX];
+        }
+        @Override
+        void postClick(){
+            castleTo.currentPiece = castleWith.currentPiece;
+            castleWith.currentPiece.setCell(castleTo);
+            castleWith.currentPiece = null;
+            castleTo.currentPiece.onMove();
+            castleTo.setBaseColor();
+            castleWith.setBaseColor();
+        }
+    }
+    
+    class castleRight extends castle{
+        
+        castleRight(king curr){
+            super(2,0,moveType.single, curr);
+            castleWith = current.currentCell.currentBoard.cellGrid[current.currentCell.posY][current.currentCell.posX+3];
+            castleTo = current.currentCell.currentBoard.cellGrid[current.currentCell.posY][current.currentCell.posX+1];
+            castleFrom = current.currentCell;
+        }
+        castleRight(king curr, castle previous){
+            super(2,0,moveType.single, curr, previous);      
+        }
+        boolean validateAction(){
+            if (current.hasMoved){
+                return false;
+            }
+            if (castleWith.currentPiece == null){
+                return false;
+            }
+            if (castleWith.currentPiece.pieceT!= pieceType.rook || castleWith.currentPiece.pieceC != current.pieceC){
+                return false;
+            }
+            
+            if (((rook)castleWith.currentPiece).hasMoved){
+                return false;
+            }
+            for (int i=1; i< castleWith.posX - castleFrom.posX; i++){
+                if (castleFrom.currentBoard.cellGrid[castleFrom.posY][castleFrom.posX+i].currentPiece!=null){
+                return false;
+            }
+            }
+            if (checkIfDifferent(castleFrom)){
+                return false;
+            }
+            if (checkIfDifferent(castleTo)){
+                return false;
+            }
+            if (checkIfDifferent(current.currentCell.currentBoard.cellGrid[current.currentCell.posY][current.currentCell.posX+2])){
+                return false;
+            }
+            
+            return true;
+        }
+        
+        boolean checkIfDifferent(cell check){
+            for (cell i : check.attackedBy){
+                if (i.currentPiece.pieceC != current.pieceC){
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+    
+    class castleLeft extends castle{
+        castleLeft(king curr){
+            super(-2,0,moveType.single, curr);
+            castleWith = current.currentCell.currentBoard.cellGrid[current.currentCell.posY][current.currentCell.posX-4];
+            castleTo = current.currentCell.currentBoard.cellGrid[current.currentCell.posY][current.currentCell.posX-1];
+            castleFrom = current.currentCell;
+        }
+        
+        
+        castleLeft(king curr, castle previous){
+            super(-2,0,moveType.single, curr, previous);
+        }
+        boolean validateAction(){
+            if (current.hasMoved){
+                return false;
+            }
+            if (castleWith.currentPiece == null){
+                return false;
+            }
+            if (castleWith.currentPiece.pieceT!= pieceType.rook || castleWith.currentPiece.pieceC != current.pieceC){
+                return false;
+            }
+            if (((rook)castleWith.currentPiece).hasMoved){
+                return false;
+            }
+            for (int i=1; i< castleFrom.posX - castleWith.posX; i++){
+                if (castleFrom.currentBoard.cellGrid[castleFrom.posY][castleFrom.posX-i].currentPiece!=null){
+                    return false;
+                }
+            }
+            if (checkIfDifferent(castleFrom)){
+                return false;
+            }
+            if (checkIfDifferent(castleTo)){
+                return false;
+            }
+            if (checkIfDifferent(current.currentCell.currentBoard.cellGrid[current.currentCell.posY][current.currentCell.posX-2])){
+                return false;
+            }
+            
+            return true;
+        }
+        
+        boolean checkIfDifferent(cell check){
+            for (cell i : check.attackedBy){
+                if (i.currentPiece.pieceC != current.pieceC){
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        
+    }   

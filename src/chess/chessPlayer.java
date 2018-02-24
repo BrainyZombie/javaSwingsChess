@@ -15,13 +15,13 @@ import javax.swing.JOptionPane;
 public class chessPlayer {
     
     public boardState currentBoard;
-    chessPlayer temp;
+    chessPlayer testBoard;
     
     chessPlayer(boardState board, boolean createTestBoard){
         currentBoard = board;
         
         if (createTestBoard){
-            temp = new chessPlayer(new boardState(currentBoard.cellGrid[0][0].size), false);
+            testBoard = new chessPlayer(new boardState(currentBoard.cellGrid[0][0].size), false);
         }
         
         for (cell[] i : currentBoard.cellGrid){
@@ -76,7 +76,7 @@ public class chessPlayer {
             for (int j=0;j<8;j++){
                 if (currentBoard.cellGrid[i][j].currentPiece!=null&&currentBoard.cellGrid[i][j].currentPiece.pieceC == currentBoard.currentTurn){
                     moves.clear();
-                    moves.addAll(getValidMoves(i,j, temp));
+                    moves.addAll(getValidMoves(i,j, testBoard));
                     currentBoard.cellGrid[i][j].setAttacking(moves);
                     if (!moves.isEmpty()){
                         checkmate = false;
@@ -86,21 +86,24 @@ public class chessPlayer {
         }  
         
         if (checkmate){
-            JOptionPane.showMessageDialog(null,"CheckMate detected on " + currentBoard.currentTurn.toString());
+            if ((currentBoard.currentTurn==pieceColor.blue?currentBoard.isCheckOnBlue:currentBoard.isCheckOnYellow))
+                JOptionPane.showMessageDialog(null,"CheckMate detected on " + currentBoard.currentTurn.toString());
+            else
+                JOptionPane.showMessageDialog(null,"StaleMate detected on " + currentBoard.currentTurn.toString());
         }
     }
     
-    final ArrayList<cell> getValidMoves(int y, int x, chessPlayer temp){
+    final ArrayList<cell> getValidMoves(int y, int x, chessPlayer testBoard){
         if (currentBoard.cellGrid[y][x].attacking == null || currentBoard.cellGrid[y][x].currentPiece == null)
             return new ArrayList<>();
         ArrayList<cell> validMoves = new ArrayList<>();
         
         
         for (cell i:currentBoard.cellGrid[y][x].attacking){
-            temp.currentBoard.duplicate(currentBoard);
-            temp.doMove(temp.currentBoard.cellGrid[y][x], temp.currentBoard.cellGrid[i.posY][i.posX]);
-            temp.detectCheck();
-            if (!(temp.currentBoard.currentTurn==pieceColor.yellow?temp.currentBoard.isCheckOnBlue:temp.currentBoard.isCheckOnYellow)){
+            testBoard.currentBoard.duplicate(currentBoard);
+            testBoard.doMove(testBoard.currentBoard.cellGrid[y][x], testBoard.currentBoard.cellGrid[i.posY][i.posX]);
+            testBoard.detectCheck();
+            if (!(testBoard.currentBoard.currentTurn==pieceColor.yellow?testBoard.currentBoard.isCheckOnBlue:testBoard.currentBoard.isCheckOnYellow)){
                 validMoves.add(i);
             }
         }
@@ -203,9 +206,9 @@ public class chessPlayer {
                 setValidMoves();
                 detectCheck();
                 if(currentBoard.isCheckOnYellow)
-                    JOptionPane.showMessageDialog(null,"Yellow");
+                    JOptionPane.showMessageDialog(null,"Yellow in check");
                 if(currentBoard.isCheckOnBlue)
-                    JOptionPane.showMessageDialog(null,"Blue");
+                    JOptionPane.showMessageDialog(null,"Blue in check");
             }
         } else{
             currentBoard.pieceSelected=true;
@@ -233,7 +236,7 @@ public class chessPlayer {
         } else {
             currentBoard.currentTurn  = pieceColor.blue;
         }
-                
+        currentBoard.moveNumber++;
         calculateAttacks();
     }
     

@@ -33,6 +33,7 @@ public class chessBoard extends JPanel{
             }
         }
         mainBoardHandler.calculateAttacks();
+        mainBoardHandler.setValidMoves();
         this.setVisible(true);
     }   
     

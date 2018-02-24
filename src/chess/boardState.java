@@ -19,6 +19,7 @@ public class boardState {
     protected cell kingBlue;
     protected boolean isCheckOnBlue = false;
     protected boolean isCheckOnYellow = false;
+    protected int moveNumber = 0;
     
     boardState(int cellSize){
         for (int i=0;i<8;i++){
@@ -35,7 +36,7 @@ public class boardState {
         currentTurn = previousBoard.currentTurn;
         pieceSelected = false;
         singlePlayer = previousBoard.singlePlayer;
-        
+        moveNumber = previousBoard.moveNumber;
         
         for (int i=0;i<8;i++){
             for (int j=0;j<8;j++){
