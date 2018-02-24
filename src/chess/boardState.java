@@ -13,7 +13,9 @@ public class boardState {
     protected pieceColor currentTurn = pieceColor.blue;
     protected cell selectedCell = null;
     protected boolean pieceSelected = false;
-    protected boolean singlePlayer = true;
+    protected playerType playerBlue;
+    protected playerType playerYellow;
+    
     public cell[][] cellGrid = new cell[8][8]; 
     protected cell kingYellow;
     protected cell kingBlue;
@@ -21,7 +23,9 @@ public class boardState {
     protected boolean isCheckOnYellow = false;
     protected int moveNumber = 0;
     
-    boardState(int cellSize){
+    boardState(int cellSize, playerType player1, playerType player2){
+        playerBlue = player1;
+        playerYellow = player2;
         for (int i=0;i<8;i++){
             for (int j=0;j<8;j++){
                 cellGrid[i][j] = new cell(j, i, cellSize, this);
@@ -35,8 +39,9 @@ public class boardState {
         isCheckOnYellow = previousBoard.isCheckOnYellow;
         currentTurn = previousBoard.currentTurn;
         pieceSelected = false;
-        singlePlayer = previousBoard.singlePlayer;
         moveNumber = previousBoard.moveNumber;
+        playerBlue = previousBoard.playerBlue;
+        playerYellow = previousBoard.playerYellow;
         
         for (int i=0;i<8;i++){
             for (int j=0;j<8;j++){

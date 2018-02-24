@@ -64,7 +64,7 @@ abstract class chessPiece {
         currentCell = cell;
         for (specialAction i: c.specialMoves){
             if (i.type == specialActionType.pawnDouble){
-                specialMoves.add(i);
+                specialMoves.add(new pawnDouble((pawn) this));
             }
             else if (i.type == specialActionType.castle)
             {
@@ -102,40 +102,6 @@ class pawn extends chessPiece{
     void onMove(){
         hasMoved=true;
     }
-    
-    
-    
-    
-    private class pawnDouble extends specialAction{
-        pawn current;
-        pawnDouble(pawn curr){
-            super(0,2,moveType.cannotCapture);
-            current=curr;
-            type = specialActionType.pawnDouble;
-        }
-        boolean validateAction(){
-            
-            if (current.pieceC.toString() == "blue"){
-                if (current.currentCell.posY - 1 < 0) return false;
-                if ( !current.hasMoved && currentCell.currentBoard.cellGrid[current.currentCell.posY - 1][current.currentCell.posX].currentPiece==null)
-                    return true;
-                else
-                    return false;
-            }
-            else{
-                if (current.currentCell.posY + 1 > 7) return false;
-                if (currentCell.currentBoard.cellGrid[current.currentCell.posY + 1][current.currentCell.posX].currentPiece==null && !current.hasMoved)
-                    return true;
-                else
-                    return false;
-            }
-        }
-        @Override
-        void postClick(){
-            current.elPassantableOn = current.currentCell.currentBoard.moveNumber + 1;
-        }   
-    }
-
 }
 
 class rook extends chessPiece{
@@ -263,7 +229,35 @@ class king extends chessPiece{
     }
 }
 
-
+class pawnDouble extends specialAction{
+        pawn current;
+        pawnDouble(pawn curr){
+            super(0,2,moveType.cannotCapture);
+            current=curr;
+            type = specialActionType.pawnDouble;
+        }
+        boolean validateAction(){
+            
+            if (current.pieceC.toString() == "blue"){
+                if (current.currentCell.posY - 1 < 0) return false;
+                if ( !current.hasMoved && current.currentCell.currentBoard.cellGrid[current.currentCell.posY - 1][current.currentCell.posX].currentPiece==null)
+                    return true;
+                else
+                    return false;
+            }
+            else{
+                if (current.currentCell.posY + 1 > 7) return false;
+                if (current.currentCell.currentBoard.cellGrid[current.currentCell.posY + 1][current.currentCell.posX].currentPiece==null && !current.hasMoved)
+                    return true;
+                else
+                    return false;
+            }
+        }
+        @Override
+        void postClick(){
+            current.elPassantableOn = current.currentCell.currentBoard.moveNumber + 1;
+        }   
+    }
     abstract class castle extends specialAction{
         king current;
         cell castleWith;

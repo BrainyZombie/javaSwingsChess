@@ -19,10 +19,12 @@ public class chessBoard extends JPanel{
     
     private boardState mainBoard;
     private chessPlayer mainBoardHandler;
-    
+    ChessAI blueAI;
+    ChessAI yellowAI;
+    int AIDepth = 3;
     public chessBoard(int cellSize) {
-        mainBoard = new boardState(cellSize);
-        mainBoardHandler = new chessPlayer(mainBoard, true);
+        mainBoard = new boardState(cellSize, playerType.human, playerType.ai);
+        mainBoardHandler = new chessPlayer(mainBoard, true, AIDepth);
         GridLayout grid = new GridLayout(8,8,0,0);
         this.setLayout(grid);
         
@@ -34,6 +36,8 @@ public class chessBoard extends JPanel{
         }
         mainBoardHandler.calculateAttacks();
         mainBoardHandler.setValidMoves();
+        yellowAI = new ChessAI(pieceColor.yellow, mainBoardHandler, AIDepth);
+        yellowAI.start();
         this.setVisible(true);
     }   
     
