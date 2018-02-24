@@ -9,6 +9,10 @@ enum cellColor{
     yellow,
     NULL
 }
+enum playerType{
+    human,
+    ai
+}
 enum pieceType{
     king,
     queen,

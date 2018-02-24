@@ -16,12 +16,20 @@ public class chessPlayer {
     
     public boardState currentBoard;
     chessPlayer temp;
+    chessPlayer AI;
     
-    chessPlayer(boardState board, boolean createTestBoard){
+    chessPlayer(boardState board, boolean createTestBoard, int AIDepth){
         currentBoard = board;
         
         if (createTestBoard){
-            temp = new chessPlayer(new boardState(currentBoard.cellGrid[0][0].size), false);
+            temp = new chessPlayer(new boardState(currentBoard.cellGrid[0][0].size, currentBoard.playerBlue, currentBoard.playerYellow), false, 0);
+        }
+        
+        if (AIDepth>1){
+            AI = new chessPlayer(new boardState(currentBoard.cellGrid[0][0].size, currentBoard.playerBlue, currentBoard.playerYellow), true, AIDepth -1);
+        }
+        else if (AIDepth == 1){
+             AI = new chessPlayer(new boardState(currentBoard.cellGrid[0][0].size, currentBoard.playerBlue, currentBoard.playerYellow), false, 0);
         }
         
         for (cell[] i : currentBoard.cellGrid){
@@ -38,7 +46,10 @@ public class chessPlayer {
     
     
     private void cellClicked(cell current){
+        
         if (!currentBoard.pieceSelected && current.currentPiece!=null){
+            if (currentBoard.currentTurn == pieceColor.blue && currentBoard.playerBlue == playerType.ai) return;
+            if (currentBoard.currentTurn == pieceColor.yellow && currentBoard.playerYellow == playerType.ai) return;
             if (current.currentPiece.pieceC != currentBoard.currentTurn){
                 current.setBaseColor();
                 JOptionPane.showMessageDialog(null,"It is " + currentBoard.currentTurn.name()+"'s turn");
