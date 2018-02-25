@@ -60,7 +60,7 @@ public class cell extends JButton{
                 attacking.add(currentBoard.cellGrid[i.posY][i.posX]);
             }
         }
-        if(c.attackedBy != null && !c.attackedBy.isEmpty()){
+        if(!c.attackedBy.isEmpty()){
             for (cell i: c.attackedBy){
                 attackedBy.add(currentBoard.cellGrid[i.posY][i.posX]);
             }
@@ -87,7 +87,7 @@ public class cell extends JButton{
                     this.currentPiece = new pawn((pawn)c.currentPiece, this);
                     break;
                 default:
-                    this.currentPiece = null;
+                    System.out.println("lolwa yeh kya hua lmao");
             }
         else
             this.currentPiece = null;

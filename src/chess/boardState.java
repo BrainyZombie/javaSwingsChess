@@ -42,17 +42,12 @@ public class boardState {
         moveNumber = previousBoard.moveNumber;
         playerBlue = previousBoard.playerBlue;
         playerYellow = previousBoard.playerYellow;
+        selectedCell = null;
         
         for (int i=0;i<8;i++){
             for (int j=0;j<8;j++){
                 cellGrid[i][j].duplicate(previousBoard.cellGrid[i][j]);
             }
-        }
-        if (previousBoard.selectedCell!= null){
-            selectedCell = cellGrid[previousBoard.selectedCell.posY][previousBoard.selectedCell.posX];
-        }
-        else{
-            selectedCell=null;
         }
             
         kingYellow = cellGrid[previousBoard.kingYellow.posY][previousBoard.kingYellow.posX];

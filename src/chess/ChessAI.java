@@ -42,9 +42,9 @@ public class ChessAI extends Thread {
         
         for (cell[] j:mainPlayer.currentBoard.cellGrid){
             for (cell k: j){
-                for (cell i:k.attacking) {
-                    if (k.currentPiece.pieceC==temp.currentBoard.currentTurn)
+                if (k.currentPiece==null||k.currentPiece.pieceC==temp.currentBoard.currentTurn)
                         continue;
+                for (cell i:k.attacking) {
                     temp.currentBoard.duplicate(mainPlayer.currentBoard);
                     tempBoard = temp.currentBoard.cellGrid;
                     temp.doMove(tempBoard[k.posY][k.posX], tempBoard[i.posY][i.posX]);
@@ -65,6 +65,7 @@ public class ChessAI extends Thread {
                 Logger.getLogger(ChessAI.class.getName()).log(Level.SEVERE, null, ex);
             }
         mainPlayer.moveHandler(bestEnd);
+        bestEnd.setBaseColor();
     }
     
     private double minimax(chessPlayer current, int depth, double alpha, double beta, boolean isMaximisingPlayer){
@@ -81,10 +82,9 @@ public class ChessAI extends Thread {
                 
                 for (cell[] j:current.currentBoard.cellGrid) {
                     for (cell k: j) {
+                        if (k.currentPiece==null||k.currentPiece.pieceC==temp.currentBoard.currentTurn)
+                            continue;
                         for (cell i : k.attacking){
-                            if (k.currentPiece.pieceC==current.currentBoard.currentTurn)
-                                continue;
-                            
                             if (depth==1){
                                 i.currentPiece = k.currentPiece;
                                 k.currentPiece = null;
@@ -95,8 +95,6 @@ public class ChessAI extends Thread {
                                 k.currentPiece = i.currentPiece;
                                 i.currentPiece = null;
                                 k.currentPiece.setCell(k);
-                                System.out.println(depth);
-                                
                             }
                             else{
                                 temp.currentBoard.duplicate(current.currentBoard);
@@ -119,9 +117,9 @@ public class ChessAI extends Thread {
                 
                 for (cell[] j:current.currentBoard.cellGrid)
                     for (cell k: j) {
+                        if (k.currentPiece==null||k.currentPiece.pieceC==temp.currentBoard.currentTurn)
+                            continue;
                         for (cell i:k.attacking){
-                            if (k.currentPiece.pieceC==current.currentBoard.currentTurn)
-                                continue;
                             if (depth==1){
                                 i.currentPiece = k.currentPiece;
                                 k.currentPiece = null;
@@ -143,8 +141,8 @@ public class ChessAI extends Thread {
                             beta = Math.min(beta, bestMove);
                             if (beta <= alpha)
                                 return bestMove;
+                            }
                         }
-                    }
                 return bestMove;
             }
         }
