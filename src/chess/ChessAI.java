@@ -44,7 +44,8 @@ public class ChessAI extends Thread {
             for (cell k: j){
                 if (k.currentPiece==null||k.currentPiece.pieceC==temp.currentBoard.currentTurn)
                         continue;
-                for (cell i:k.attacking) {
+                cell[] attacks = k.attacking.toArray(new cell[k.attacking.size()]);
+                for (cell i:attacks) {
                     temp.currentBoard.duplicate(mainPlayer.currentBoard);
                     tempBoard = temp.currentBoard.cellGrid;
                     temp.doMove(tempBoard[k.posY][k.posX], tempBoard[i.posY][i.posX]);
@@ -58,6 +59,10 @@ public class ChessAI extends Thread {
             }
         }
         System.out.println("stop");
+        if (bestStart==null){
+            System.gc();
+            return ;
+        }
         mainPlayer.moveHandler(bestStart);
         try {
                 sleep(700);
@@ -66,6 +71,7 @@ public class ChessAI extends Thread {
             }
         mainPlayer.moveHandler(bestEnd);
         bestEnd.setBaseColor();
+        System.gc();
     }
     
     private double minimax(chessPlayer current, int depth, double alpha, double beta, boolean isMaximisingPlayer){
@@ -84,7 +90,8 @@ public class ChessAI extends Thread {
                     for (cell k: j) {
                         if (k.currentPiece==null||k.currentPiece.pieceC==temp.currentBoard.currentTurn)
                             continue;
-                        for (cell i : k.attacking){
+                        cell[] attacks = k.attacking.toArray(new cell[k.attacking.size()]);
+                        for (cell i : attacks){
                             if (depth==1){
                                 i.currentPiece = k.currentPiece;
                                 k.currentPiece = null;
@@ -119,7 +126,8 @@ public class ChessAI extends Thread {
                     for (cell k: j) {
                         if (k.currentPiece==null||k.currentPiece.pieceC==temp.currentBoard.currentTurn)
                             continue;
-                        for (cell i:k.attacking){
+                        cell[] attacks = k.attacking.toArray(new cell[k.attacking.size()]);
+                        for (cell i:attacks){
                             if (depth==1){
                                 i.currentPiece = k.currentPiece;
                                 k.currentPiece = null;

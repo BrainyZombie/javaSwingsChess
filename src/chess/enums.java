@@ -51,6 +51,11 @@ class pieceMove{
         this.y=y;
         this.type=type;
     }
+    pieceMove(pieceMove previous){
+        x = previous.x;
+        y = previous.y;
+        type = previous.type;
+    }
 }
 
 abstract class specialAction extends pieceMove{

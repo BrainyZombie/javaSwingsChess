@@ -59,9 +59,10 @@ abstract class chessPiece {
         hoverCellColor = cellColor.green;
         hoverInvalidCellColor=cellColor.red;
         movableSelectedCellColor = cellColor.red;
-        
-        movesAllowed.addAll(c.movesAllowed);
         currentCell = cell;
+        for (pieceMove i : c.movesAllowed){
+            movesAllowed.add(new pieceMove(i));
+        }
         for (specialAction i: c.specialMoves){
             if (i.type == specialActionType.pawnDouble){
                 specialMoves.add(new pawnDouble((pawn) this));
