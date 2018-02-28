@@ -21,6 +21,7 @@ public class boardState {
     protected cell kingBlue;
     protected boolean isCheckOnBlue = false;
     protected boolean isCheckOnYellow = false;
+    protected boolean mate = false;
     protected int moveNumber = 0;
     
     boardState(int cellSize, playerType player1, playerType player2){

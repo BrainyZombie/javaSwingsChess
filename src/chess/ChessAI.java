@@ -28,8 +28,10 @@ public class ChessAI extends Thread {
             } catch (InterruptedException ex) {
                 Logger.getLogger(ChessAI.class.getName()).log(Level.SEVERE, null, ex);
             }
-            if (mainPlayer.currentBoard.currentTurn == moveOn)
+            if (mainPlayer.currentBoard.currentTurn == moveOn){
                 aiMove();
+                mainPlayer.resetColors();
+            }
         }
     }
     private void aiMove() {

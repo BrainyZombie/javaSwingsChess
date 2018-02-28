@@ -81,7 +81,7 @@ public class chessPlayer {
     }
     
     final void setValidMoves(){
-        boolean checkmate = true;
+        currentBoard.mate = true;
         ArrayList<cell> moves = new ArrayList<>();
         for (int i=0;i<8;i++){
             for (int j=0;j<8;j++){
@@ -90,17 +90,10 @@ public class chessPlayer {
                     moves.addAll(getValidMoves(i,j, testBoard));
                     currentBoard.cellGrid[i][j].setAttacking(moves);
                     if (!moves.isEmpty()){
-                        checkmate = false;
+                       currentBoard.mate = false;
                     }
                 }
             }
-        }  
-        
-        if (checkmate){
-            if ((currentBoard.currentTurn==pieceColor.blue?currentBoard.isCheckOnBlue:currentBoard.isCheckOnYellow))
-                JOptionPane.showMessageDialog(null,"CheckMate detected on " + currentBoard.currentTurn.toString());
-            else
-                JOptionPane.showMessageDialog(null,"StaleMate detected on " + currentBoard.currentTurn.toString());
         }
     }
     
@@ -216,9 +209,15 @@ public class chessPlayer {
                 
                 setValidMoves();
                 detectCheck();
-                if(currentBoard.isCheckOnYellow)
+                if (currentBoard.mate){
+                    if ((currentBoard.currentTurn==pieceColor.blue?currentBoard.isCheckOnBlue:currentBoard.isCheckOnYellow))
+                        JOptionPane.showMessageDialog(null,"CheckMate detected on " + currentBoard.currentTurn.toString());
+                    else
+                        JOptionPane.showMessageDialog(null,"StaleMate detected on " + currentBoard.currentTurn.toString());
+                }
+                else if(currentBoard.isCheckOnYellow)
                     JOptionPane.showMessageDialog(null,"Yellow in check");
-                if(currentBoard.isCheckOnBlue)
+                else if(currentBoard.isCheckOnBlue)
                     JOptionPane.showMessageDialog(null,"Blue in check");
             }
         } else{
@@ -298,5 +297,13 @@ public class chessPlayer {
             moves.get(i).setMovableSelectedColor();
         }
         current.setMovableUnselectedColor();
+    }
+    
+    final void resetColors(){
+        for (cell[] i: currentBoard.cellGrid){
+            for (cell j: i){
+                j.setBaseColor();
+            }
+        }
     }
 }
