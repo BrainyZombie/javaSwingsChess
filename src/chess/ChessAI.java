@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author student
+ * @author pranav tharoor
  */
 public class ChessAI extends Thread {
     pieceColor moveOn;
@@ -108,7 +108,6 @@ public class ChessAI extends Thread {
                             else{
                                 temp.currentBoard.duplicate(current.currentBoard);
                                 tempBoard = temp.currentBoard.cellGrid;
-//                                dispBoard(current.currentBoard.cellGrid);
                                 temp.doMove(tempBoard[k.posY][k.posX], tempBoard[i.posY][i.posX]);
                                 bestMove = Math.max(bestMove, minimax(temp, depth-1, alpha, beta, !isMaximisingPlayer));
                             }
@@ -159,9 +158,17 @@ public class ChessAI extends Thread {
     }
     
     private double evalBoard(chessPlayer current) {
-        return Math.random();
+        double value = 0.0;
+        cell[][] game = current.currentBoard.cellGrid;
+        for(cell i[] : game)
+            for(cell j: i)
+                if(j.currentPiece != null)
+                    value += getPieceValue(j.currentPiece.pieceC, j.currentPiece.pieceT, j.posX, j.posY);
+        return value;
+            
     }
     
+    // dev
     final void dispBoard(cell[][] game) {
         for(int i = 0; i < game.length; i++) {
             for(int j = 0; j < game.length; j++) {
@@ -173,5 +180,113 @@ public class ChessAI extends Thread {
         }
         System.out.println();
     }
+    
+    final double getPieceValue(pieceColor color, pieceType type, int x, int y) {
+        double value = 0.0;
+        switch(type) {
+            case pawn:
+                value += 10 + (color == pieceColor.blue ? PawnTable[x * 8 + y] : PawnTable[63 - x * 8 - y]);
+                break;
+            case rook:
+                value += 50 + (color == pieceColor.blue ? RookTable[x * 8 + y] : RookTable[63 - x * 8 - y]);
+                break;
+            case knight:
+                value += 30 + (color == pieceColor.blue ? KnightTable[x * 8 + y] : KnightTable[63 - x * 8 - y]);
+                break;
+            case bishop:
+                value += 30 + (color == pieceColor.blue ? BishopTable[x * 8 + y] : BishopTable[63 - x * 8 - y]);
+                break;
+            case queen:
+                value += 90 + (color == pieceColor.blue ? QueenTable[x * 8 + y] : QueenTable[63 - x * 8 - y]);
+                break;
+            case king:
+                value += 900 + (color == pieceColor.blue ? KingTable[x * 8 + y] : KingTable[63 - x * 8 - y]);
+                break;
+        }
+        return color == pieceColor.blue ? value : -value; 
+    }
+
+    private static double[] PawnTable = new double[]
+    {
+        0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+        5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0,
+        1.0,  1.0,  2.0,  3.0,  3.0,  2.0,  1.0,  1.0,
+        0.5,  0.5,  1.0,  2.5,  2.5,  1.0,  0.5,  0.5,
+        0.0,  0.0,  0.0,  2.0,  2.0,  0.0,  0.0,  0.0,
+        0.5, -0.5, -1.0,  0.0,  0.0, -1.0, -0.5,  0.5,
+        0.5,  1.0, 1.0,  -2.0, -2.0,  1.0,  1.0,  0.5,
+        0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0
+    };
+    private static double[] KnightTable = new double[]
+    {
+        -5.0, -4.0, -3.0, -3.0, -3.0, -3.0, -4.0, -5.0,
+        -4.0, -2.0,  0.0,  0.0,  0.0,  0.0, -2.0, -4.0,
+        -3.0,  0.0,  1.0,  1.5,  1.5,  1.0,  0.0, -3.0,
+        -3.0,  0.5,  1.5,  2.0,  2.0,  1.5,  0.5, -3.0,
+        -3.0,  0.0,  1.5,  2.0,  2.0,  1.5,  0.0, -3.0,
+        -3.0,  0.5,  1.0,  1.5,  1.5,  1.0,  0.5, -3.0,
+        -4.0, -2.0,  0.0,  0.5,  0.5,  0.0, -2.0, -4.0,
+        -5.0, -4.0, -3.0, -3.0, -3.0, -3.0, -4.0, -5.0
+    };
+
+    private static double[] BishopTable = new double[]
+    {
+        -2.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -2.0,
+        -1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -1.0,
+        -1.0,  0.0,  0.5,  1.0,  1.0,  0.5,  0.0, -1.0,
+        -1.0,  0.5,  0.5,  1.0,  1.0,  0.5,  0.5, -1.0,
+        -1.0,  0.0,  1.0,  1.0,  1.0,  1.0,  0.0, -1.0,
+        -1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0, -1.0,
+        -1.0,  0.5,  0.0,  0.0,  0.0,  0.0,  0.5, -1.0,
+        -2.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -2.0
+    };
+
+    private static double[] KingTable = new double[]
+    {
+        -3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0,
+        -3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0,
+        -3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0,
+        -3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0,
+        -2.0, -3.0, -3.0, -4.0, -4.0, -3.0, -3.0, -2.0,
+        -1.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -1.0,
+         2.0,  2.0,  0.0,  0.0,  0.0,  0.0,  2.0,  2.0,
+         2.0,  3.0,  1.0,  0.0,  0.0,  1.0,  3.0,  2.0
+    };
+
+//    private static short[] KingTableEndGame = new short[]
+//    {
+//        -50,-40,-30,-20,-20,-30,-40,-50,
+//        -30,-20,-10,  0,  0,-10,-20,-30,
+//        -30,-10, 20, 30, 30, 20,-10,-30,
+//        -30,-10, 30, 40, 40, 30,-10,-30,
+//        -30,-10, 30, 40, 40, 30,-10,-30,
+//        -30,-10, 20, 30, 30, 20,-10,-30,
+//        -30,-30,  0,  0,  0,  0,-30,-30,
+//        -50,-30,-30,-30,-30,-30,-30,-50
+//    };
+
+    private static double[] RookTable = new double[]
+    {
+         0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+         0.5,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.5,
+        -0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5,
+        -0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5,
+        -0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5,
+        -0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5,
+        -0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5,
+         0.0,   0.0, 0.0,  0.5,  0.5,  0.0,  0.0,  0.0
+    };
+    
+    private static double[] QueenTable = new double[]
+    {
+        -2.0, -1.0, -1.0, -0.5, -0.5, -1.0, -1.0, -2.0,
+        -1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -1.0,
+        -1.0,  0.0,  0.5,  0.5,  0.5,  0.5,  0.0, -1.0,
+        -0.5,  0.0,  0.5,  0.5,  0.5,  0.5,  0.0, -0.5,
+         0.0,  0.0,  0.5,  0.5,  0.5,  0.5,  0.0, -0.5,
+        -1.0,  0.5,  0.5,  0.5,  0.5,  0.5,  0.0, -1.0,
+        -1.0,  0.0,  0.5,  0.0,  0.0,  0.0,  0.0, -1.0,
+        -2.0, -1.0, -1.0, -0.5, -0.5, -1.0, -1.0, -2.0
+    };
     
 }

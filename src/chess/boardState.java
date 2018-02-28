@@ -86,4 +86,12 @@ public class boardState {
         cellGrid[7][6].setPiece(new knight(pieceColor.blue, cellGrid[7][6]));
         cellGrid[7][7].setPiece(new rook(pieceColor.blue, cellGrid[7][7]));
     }
+    
+    final void resetColors(){
+        for (cell[] i : cellGrid){
+            for (cell j: i){
+                j.setBaseColor();
+            }
+        }
+    }
 }

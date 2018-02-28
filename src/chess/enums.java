@@ -36,9 +36,11 @@ enum moveType{
 }
 
 enum specialActionType{
-    elPassant,
+    elPassantRight,
+    elPassantLeft,
     pawnDouble,
-    castle
+    castleRight,
+    castleLeft,
 }
 
 class pieceMove{

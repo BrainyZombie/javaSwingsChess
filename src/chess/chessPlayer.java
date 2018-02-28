@@ -205,8 +205,6 @@ public class chessPlayer {
                 current.setHoverInvalidColor();
                 currentBoard.pieceSelected=false;
                 currentBoard.selectedCell=null;
-                
-                
                 setValidMoves();
                 detectCheck();
                 if (currentBoard.mate){

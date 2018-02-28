@@ -11,7 +11,6 @@ package chess;
  */
 
 import java.awt.GridLayout;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import java.util.ArrayList;
 

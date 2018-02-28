@@ -67,12 +67,20 @@ abstract class chessPiece {
             if (i.type == specialActionType.pawnDouble){
                 specialMoves.add(new pawnDouble((pawn) this));
             }
-            else if (i.type == specialActionType.castle)
-            {
+            else if (i.type == specialActionType.castleRight){
                 specialMoves.add(new castleRight((king) this, (castle) i));
             }
+            else if (i.type == specialActionType.castleLeft){
+                specialMoves.add(new castleLeft((king) this, (castle) i));
+            }
+            else if (i.type == specialActionType.elPassantRight){
+                specialMoves.add(new elPassantRight((pawn)this));
+            }
+            else if (i.type == specialActionType.elPassantLeft){
+                specialMoves.add(new elPassantLeft((pawn)this));
+                
+            }
         }
-        
     }
     
     void setCell(cell cell){
@@ -98,6 +106,8 @@ class pawn extends chessPiece{
         movesAllowed.add(new pieceMove(1,1,moveType.onlyCapture));
         movesAllowed.add(new pieceMove(-1,1,moveType.onlyCapture));
         specialMoves.add(new pawnDouble(this));
+        specialMoves.add(new elPassantRight(this));
+        specialMoves.add(new elPassantLeft(this));
     }
     @Override
     void onMove(){
@@ -230,7 +240,7 @@ class king extends chessPiece{
     }
 }
 
-class pawnDouble extends specialAction{
+    class pawnDouble extends specialAction{
         pawn current;
         pawnDouble(pawn curr){
             super(0,2,moveType.cannotCapture);
@@ -259,6 +269,71 @@ class pawnDouble extends specialAction{
             current.elPassantableOn = current.currentCell.currentBoard.moveNumber + 1;
         }   
     }
+    abstract class elPassant extends specialAction{
+        pawn current;
+        elPassant(int x, int y, moveType move, pawn curr){
+            super(x, y, move);
+            current=curr;
+        }
+        @Override
+        void postClick(){
+            if (current.pieceC == pieceColor.blue){
+                current.currentCell.currentBoard.cellGrid[current.currentCell.posY+1][current.currentCell.posX].currentPiece=null;
+                current.currentCell.currentBoard.cellGrid[current.currentCell.posY+1][current.currentCell.posX].setBaseColor();
+             }
+             else{
+                current.currentCell.currentBoard.cellGrid[current.currentCell.posY-1][current.currentCell.posX].currentPiece=null;
+                current.currentCell.currentBoard.cellGrid[current.currentCell.posY-1][current.currentCell.posX].setBaseColor();
+             }
+        }
+    }
+    class elPassantRight extends elPassant{
+        elPassantRight(pawn curr){
+            super(1,1,moveType.cannotCapture, curr);
+            type = specialActionType.elPassantRight;
+        }
+        boolean validateAction(){
+            cell[][] cellGrid =current.currentCell.currentBoard.cellGrid;
+            cell currentCell = current.currentCell;
+            cell targetCell;
+            if (currentCell.posX+1>7)
+                return false;
+            targetCell = cellGrid[currentCell.posY][currentCell.posX+1];
+            if (targetCell.currentPiece==null || targetCell.currentPiece.pieceT!=pieceType.pawn || targetCell.currentPiece.pieceC == currentCell.currentBoard.currentTurn){
+                return false;
+            }
+            else if (((pawn)targetCell.currentPiece).elPassantableOn != currentCell.currentBoard.moveNumber){
+                return false;
+            }
+            return true;
+        }
+    }
+
+    class elPassantLeft extends elPassant{
+        pawn current;
+        elPassantLeft(pawn curr){
+            super(-1,1,moveType.cannotCapture, curr);
+            current=curr;
+            type = specialActionType.elPassantLeft;
+        }
+        boolean validateAction(){
+            cell[][] cellGrid =current.currentCell.currentBoard.cellGrid;
+            cell currentCell = current.currentCell;
+            cell targetCell;
+            if (currentCell.posX-1<0)
+                return false;
+            targetCell = cellGrid[currentCell.posY][currentCell.posX-1];
+            
+            if (targetCell.currentPiece==null || targetCell.currentPiece.pieceT!=pieceType.pawn || targetCell.currentPiece.pieceC == currentCell.currentBoard.currentTurn){
+                return false;
+            }
+            else if (((pawn)targetCell.currentPiece).elPassantableOn != currentCell.currentBoard.moveNumber){
+                return false;
+            }
+            return true;
+        }
+    }
+
     abstract class castle extends specialAction{
         king current;
         cell castleWith;
@@ -266,12 +341,11 @@ class pawnDouble extends specialAction{
         cell castleFrom;
         castle(int x, int y, moveType move, king curr){
             super(x,y,move);
-            type = specialActionType.castle;
             current = curr;
         }
         castle(int x, int y, moveType move, king curr, castle previous){
             super(x,y,move);
-            type = specialActionType.castle;
+            type = previous.type;
             current = curr;
             castleWith = current.currentCell.currentBoard.cellGrid[previous.castleWith.posY][previous.castleWith.posX];
             castleTo = current.currentCell.currentBoard.cellGrid[previous.castleTo.posY][previous.castleTo.posX];
@@ -292,6 +366,7 @@ class pawnDouble extends specialAction{
         
         castleRight(king curr){
             super(2,0,moveType.single, curr);
+            type = specialActionType.castleRight;
             castleWith = current.currentCell.currentBoard.cellGrid[current.currentCell.posY][current.currentCell.posX+3];
             castleTo = current.currentCell.currentBoard.cellGrid[current.currentCell.posY][current.currentCell.posX+1];
             castleFrom = current.currentCell;
@@ -344,6 +419,7 @@ class pawnDouble extends specialAction{
     class castleLeft extends castle{
         castleLeft(king curr){
             super(-2,0,moveType.single, curr);
+            type = specialActionType.castleLeft;
             castleWith = current.currentCell.currentBoard.cellGrid[current.currentCell.posY][current.currentCell.posX-4];
             castleTo = current.currentCell.currentBoard.cellGrid[current.currentCell.posY][current.currentCell.posX-1];
             castleFrom = current.currentCell;
