@@ -35,7 +35,7 @@ public class chessBoard extends JPanel{
         }
         mainBoardHandler.calculateAttacks();
         mainBoardHandler.setValidMoves();
-        yellowAI = new ChessAiHandler(pieceColor.yellow, mainBoardHandler, AIDepth, 4);
+        yellowAI = new ChessAiHandler(pieceColor.yellow, mainBoardHandler, AIDepth, 2);
         yellowAI.start();
         this.setVisible(true);
     }   

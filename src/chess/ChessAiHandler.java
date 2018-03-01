@@ -23,6 +23,7 @@ public class ChessAiHandler extends Thread{
     chessPlayer threadPlayer[];
         candidateMove[] moveList;
         candidateMove bestMove;
+        int numMoves = 0;
     ChessAiHandler(pieceColor c, chessPlayer main, int depth, int numThreads){
         moveOn = c;
         mainPlayer=main;
@@ -50,9 +51,9 @@ public class ChessAiHandler extends Thread{
     }
     
     void aiMove(){
-        int numMoves = 0;
         moveList = new candidateMove[numThreads];
         bestMove = new candidateMove();
+        bestMove.score=-9999;
         for (int i=0;i<numThreads;i++){
             moveList[i] = new candidateMove();
         }
@@ -69,15 +70,14 @@ public class ChessAiHandler extends Thread{
                     
                     numMoves++;
                     if (numMoves==numThreads){
-                        numMoves=0;
                         threads();
+                        numMoves=0;
                     }
                 }
-        
             }
         }
-        threads();
-        if (bestMove.from==null)    return;
+                threads();
+        if (bestMove.from==null){System.out.println("eh??");    return;}
         mainPlayer.moveHandler(mainPlayer.currentBoard.cellGrid[bestMove.from.posY][bestMove.from.posX]);
         try {
                 sleep(700);
@@ -88,22 +88,24 @@ public class ChessAiHandler extends Thread{
         System.gc();
     }
     
-    void threads(){
+    synchronized void threads(){
         try {
-                            for (int m=0;m<numThreads;m++){
+                            for (int m=0;m<numMoves;m++){
                                 aiThread[m].join();
                             }
                         }
                         catch (InterruptedException ex) {
                                 Logger.getLogger(ChessAiHandler.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                        int maxScoring = 0;
-                        for (int m=1; m<numThreads; m++){
-//                            aiThread[m] = moveList[m].thread;
-                            if (moveList[maxScoring].score<moveList[m].score)
-                                maxScoring=m;
+//                                System.out.println("            "+bestMove.score);
+                        for (int m=1; m<numMoves; m++){
+                                System.out.println("            "+bestMove.score+"  "+ moveList[m].score);
+                            if (bestMove.score<=moveList[m].score){
+                                bestMove.from = moveList[m].from;
+                                bestMove.to = moveList[m].to;
+                                bestMove.score = moveList[m].score;
+                            }
                         }
-                        bestMove = moveList[maxScoring];
 //                        System.out.println(bestMove.score);
     }
 }
