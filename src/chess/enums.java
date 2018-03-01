@@ -68,3 +68,10 @@ abstract class specialAction extends pieceMove{
     abstract boolean validateAction();
     abstract void postClick();
 }
+
+class candidateMove{
+    cell from;
+    cell to;
+    double score;
+    ChessAI thread;
+}
