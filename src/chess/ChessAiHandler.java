@@ -31,9 +31,18 @@ public class ChessAiHandler extends Thread{
         this.numThreads = numThreads;
         aiThread = new ChessAI[numThreads];
         threadPlayer = new chessPlayer[numThreads];
+        
+        chessPlayerCreator[] temp = new chessPlayerCreator[numThreads];
         for (int i=0;i<numThreads;i++){
             System.out.println("y");
-            threadPlayer[i] = new chessPlayer(new boardState(1, mainPlayer.currentBoard.playerBlue, mainPlayer.currentBoard.playerYellow), true, depth);
+            (temp[i] = new chessPlayerCreator(threadPlayer, mainPlayer, i, depth)).start();
+        }
+        for (int i=0;i<numThreads; i++){
+            try {
+                temp[i].join();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ChessAiHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
     public void run (){
@@ -107,6 +116,22 @@ public class ChessAiHandler extends Thread{
                             }
                         }
 //                        System.out.println(bestMove.score);
+    }
+}
+
+class chessPlayerCreator extends Thread{
+    chessPlayer[] playerTarget;
+    chessPlayer mainPlayer;
+    int depth;
+    int index;
+    chessPlayerCreator(chessPlayer[] ref, chessPlayer main, int ind, int dep){
+        playerTarget = ref;
+        index=ind;
+        depth = dep;
+        mainPlayer = main;
+    }
+    public void run(){
+        playerTarget[index] = new chessPlayer(new boardState(1, mainPlayer.currentBoard.playerBlue, mainPlayer.currentBoard.playerYellow), true, depth);
     }
 }
 
