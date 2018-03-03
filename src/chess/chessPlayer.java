@@ -55,9 +55,8 @@ public class chessPlayer {
                 JOptionPane.showMessageDialog(null,"It is " + currentBoard.currentTurn.name()+"'s turn");
                 return;
             }
-           else if (current.attacking==null){
+           else if (current.attacking.isEmpty()){
                 current.setBaseColor();
-                JOptionPane.showMessageDialog(null,"This piece has no valid moves");
                 return;                        
             }
             else{
@@ -224,7 +223,23 @@ public class chessPlayer {
             setMovableSelected(current);
         }
     }
-    
+    final  void moveHandler(cell from, cell to){
+	doMove(from, to);
+        from.setBaseColor();
+        to.setHoverInvalidColor();
+        setValidMoves();
+        detectCheck();
+        if (currentBoard.mate){
+            if ((currentBoard.currentTurn==pieceColor.blue?currentBoard.isCheckOnBlue:currentBoard.isCheckOnYellow))
+                JOptionPane.showMessageDialog(null,"CheckMate detected on " + currentBoard.currentTurn.toString());
+            else
+                JOptionPane.showMessageDialog(null,"StaleMate detected on " + currentBoard.currentTurn.toString());
+            }
+            else if(currentBoard.isCheckOnYellow)
+                JOptionPane.showMessageDialog(null,"Yellow in check");
+            else if(currentBoard.isCheckOnBlue)
+                JOptionPane.showMessageDialog(null,"Blue in check");
+    }
     final void doMove(cell moveFrom, cell moveTo){
         specialAction action = wasSpecialAction(moveTo, moveFrom);
         moveTo.currentPiece = moveFrom.currentPiece;

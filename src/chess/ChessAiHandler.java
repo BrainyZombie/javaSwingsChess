@@ -31,9 +31,18 @@ public class ChessAiHandler extends Thread{
         this.numThreads = numThreads;
         aiThread = new ChessAI[numThreads];
         threadPlayer = new chessPlayer[numThreads];
+        
+        chessPlayerCreator[] temp = new chessPlayerCreator[numThreads];
         for (int i=0;i<numThreads;i++){
             System.out.println("y");
-            threadPlayer[i] = new chessPlayer(new boardState(1, mainPlayer.currentBoard.playerBlue, mainPlayer.currentBoard.playerYellow), true, depth);
+            (temp[i] = new chessPlayerCreator(threadPlayer, mainPlayer, i, depth)).start();
+        }
+        for (int i=0;i<numThreads; i++){
+            try {
+                temp[i].join();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ChessAiHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
     public void run (){
@@ -56,6 +65,7 @@ public class ChessAiHandler extends Thread{
         bestMove.score=-9999;
         for (int i=0;i<numThreads;i++){
             moveList[i] = new candidateMove();
+            moveList[i].score = -9999.0;
         }
         for (cell[] j:mainPlayer.currentBoard.cellGrid){
             for (cell k: j){
@@ -78,12 +88,13 @@ public class ChessAiHandler extends Thread{
         }
                 threads();
         if (bestMove.from==null){System.out.println("eh??");    return;}
-        mainPlayer.moveHandler(mainPlayer.currentBoard.cellGrid[bestMove.from.posY][bestMove.from.posX]);
+        mainPlayer.currentBoard.cellGrid[bestMove.to.posY][bestMove.to.posX].setMovableSelectedColor();
+        mainPlayer.currentBoard.cellGrid[bestMove.from.posY][bestMove.from.posX].setMovableUnselectedColor();
         try {
                 sleep(700);
             } catch (InterruptedException ex) {
             }
-        mainPlayer.moveHandler(mainPlayer.currentBoard.cellGrid[bestMove.to.posY][bestMove.to.posX]);
+        mainPlayer.moveHandler(mainPlayer.currentBoard.cellGrid[bestMove.from.posY][bestMove.from.posX], mainPlayer.currentBoard.cellGrid[bestMove.to.posY][bestMove.to.posX]);
         mainPlayer.currentBoard.cellGrid[bestMove.to.posY][bestMove.to.posX].setBaseColor();
         System.gc();
     }
@@ -98,7 +109,7 @@ public class ChessAiHandler extends Thread{
                                 Logger.getLogger(ChessAiHandler.class.getName()).log(Level.SEVERE, null, ex);
                         }
 //                                System.out.println("            "+bestMove.score);
-                        for (int m=1; m<numMoves; m++){
+                        for (int m=0; m<numMoves; m++){
                                 System.out.println("            "+bestMove.score+"  "+ moveList[m].score);
                             if (bestMove.score<=moveList[m].score){
                                 bestMove.from = moveList[m].from;
@@ -106,7 +117,33 @@ public class ChessAiHandler extends Thread{
                                 bestMove.score = moveList[m].score;
                             }
                         }
+                        if (bestMove.from==null){
+                            for (int m=0; m<numMoves; m++){
+                                System.out.println("            "+bestMove.score+"  "+ moveList[m].score);
+                            if (bestMove.score<=moveList[m].score){
+                                bestMove.from = moveList[m].from;
+                                bestMove.to = moveList[m].to;
+                                bestMove.score = moveList[m].score;
+                            }
+                        }
+                        }
 //                        System.out.println(bestMove.score);
+    }
+}
+
+class chessPlayerCreator extends Thread{
+    chessPlayer[] playerTarget;
+    chessPlayer mainPlayer;
+    int depth;
+    int index;
+    chessPlayerCreator(chessPlayer[] ref, chessPlayer main, int ind, int dep){
+        playerTarget = ref;
+        index=ind;
+        depth = dep;
+        mainPlayer = main;
+    }
+    public void run(){
+        playerTarget[index] = new chessPlayer(new boardState(1, mainPlayer.currentBoard.playerBlue, mainPlayer.currentBoard.playerYellow), true, depth);
     }
 }
 

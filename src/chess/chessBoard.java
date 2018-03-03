@@ -21,6 +21,7 @@ public class chessBoard extends JPanel{
     ChessAiHandler blueAI;
     ChessAiHandler yellowAI;
     int AIDepth = 3;
+    int aiThread = 4;
     public chessBoard(int cellSize) {
         mainBoard = new boardState(cellSize, playerType.human, playerType.ai);
         mainBoardHandler = new chessPlayer(mainBoard, true, 0);
@@ -35,7 +36,7 @@ public class chessBoard extends JPanel{
         }
         mainBoardHandler.calculateAttacks();
         mainBoardHandler.setValidMoves();
-        yellowAI = new ChessAiHandler(pieceColor.yellow, mainBoardHandler, AIDepth, 8);
+        yellowAI = new ChessAiHandler(pieceColor.yellow, mainBoardHandler, AIDepth, aiThread);
         yellowAI.start();
         this.setVisible(true);
     }   
