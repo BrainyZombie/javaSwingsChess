@@ -24,7 +24,7 @@ public class chessBoard extends JPanel{
     int AIDepth = 3;
     int aiThread = 4;
     public chessBoard(int cellSize) {
-        mainBoard = new boardState(cellSize, playerType.ai, playerType.ai);
+        mainBoard = new boardState(cellSize, playerType.human, playerType.ai);
         mainPlayer = new chessPlayer(mainBoard, true, 0);
         mainPlayer.tracker = new moveTracker(mainBoard);
         mainPlayer.tracker.start();
@@ -61,25 +61,28 @@ public class chessBoard extends JPanel{
             }
         }
         yellowAI = new ChessAiHandler(pieceColor.yellow, mainPlayer, AIDepth, aiThread);
-        blueAI = new ChessAiHandler(pieceColor.blue, mainPlayer, AIDepth, aiThread);
-        blueAI.start();
+//        blueAI = new ChessAiHandler(pieceColor.blue, mainPlayer, AIDepth, aiThread);
+//        blueAI.start();
         yellowAI.start();
         this.setVisible(true);
     }   
     
     
     final boolean doUndo(){
-        if (mainPlayer.tracker.currentBoard.previous == null)
+        if (mainPlayer.tracker.previousBoard == null)
             return false;
-        mainBoard.duplicate(mainPlayer.tracker.currentBoard.previous);
-        mainPlayer.tracker.currentBoard = mainPlayer.tracker.currentBoard.previous;
+        mainPlayer.tracker.currentBoard = mainPlayer.tracker.previousBoard;
+        mainPlayer.tracker.previousBoard = mainPlayer.tracker.previousBoard.previous;
+        mainBoard.duplicate(mainPlayer.tracker.currentBoard);
         return true;
     }
     final boolean doRedo(){
         if (mainPlayer.tracker.currentBoard.next == null)
             return false;
-        mainBoard.duplicate(mainPlayer.tracker.currentBoard.next);
+        
+        mainPlayer.tracker.previousBoard = mainPlayer.tracker.currentBoard;
         mainPlayer.tracker.currentBoard = mainPlayer.tracker.currentBoard.next;
+        mainBoard.duplicate(mainPlayer.tracker.currentBoard);
         return true;
     }
     

@@ -12,6 +12,7 @@ package chess;
 public class moveTracker extends Thread{
     boardState temp;
     boardState currentBoard;
+    boardState previousBoard;
     boolean active = false;
     @Override
     public void run(){
@@ -25,24 +26,30 @@ public class moveTracker extends Thread{
         }
     }
     moveTracker(boardState current){
-        currentBoard= current;
-        update();
+        current.next = null;
+        current.previous = null;
+        currentBoard= new boardState(current.cellGrid[0][0].size, current.playerBlue, current.playerYellow);
+        currentBoard.duplicate(current);
     }
     void addBoard(boardState current){
-        currentBoard= current;
+        temp = current;
         active = true;
     }
     void update(){
-        currentBoard.boardNumber++;
-        currentBoard.next = null;
+        previousBoard = currentBoard;
+        currentBoard = temp;
+        currentBoard.boardNumber++;        
         temp = new boardState(currentBoard.cellGrid[0][0].size, currentBoard.playerBlue, currentBoard.playerYellow);
         temp.duplicate(currentBoard);
-        if (temp.previous != null)
-            temp.previous.next = temp;
-        currentBoard.previous = temp;
         currentBoard = temp;
+        currentBoard.next = null;
+        currentBoard.previous = previousBoard;
+        previousBoard.next = currentBoard;
         active = false;
-        
+        for (;temp!=null;temp = temp.previous){
+            System.out.print(temp.boardNumber + "->");
+        }
+        System.out.println();
     }
     
     

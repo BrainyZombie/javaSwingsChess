@@ -86,7 +86,7 @@ public class chessPlayer {
         ArrayList<cell> moves = new ArrayList<>();
         for (int i=0;i<8;i++){
             for (int j=0;j<8;j++){
-                if (currentBoard.cellGrid[i][j].currentPiece!=null&&currentBoard.cellGrid[i][j].currentPiece.pieceC == currentBoard.currentTurn){
+                if (currentBoard.cellGrid[i][j].currentPiece!=null&&currentBoard.cellGrid[i][j].currentPiece.pieceC != currentBoard.currentTurn){
                     moves.clear();
                     moves.addAll(getValidMoves(i,j, testBoard));
                     currentBoard.cellGrid[i][j].setAttacking(moves);
@@ -106,9 +106,9 @@ public class chessPlayer {
         
         for (cell i:currentBoard.cellGrid[y][x].attacking){
             testBoard.currentBoard.duplicate(currentBoard);
-            testBoard.doMove(testBoard.currentBoard.cellGrid[y][x], testBoard.currentBoard.cellGrid[i.posY][i.posX]);
+            testBoard.testMove(testBoard.currentBoard.cellGrid[y][x], testBoard.currentBoard.cellGrid[i.posY][i.posX]);
             testBoard.detectCheck();
-            if (!(testBoard.currentBoard.currentTurn==pieceColor.yellow?testBoard.currentBoard.isCheckOnBlue:testBoard.currentBoard.isCheckOnYellow)){
+            if (!(testBoard.currentBoard.currentTurn==pieceColor.yellow?testBoard.currentBoard.isCheckOnYellow:testBoard.currentBoard.isCheckOnBlue)){
                 validMoves.add(i);
             }
         }
@@ -199,56 +199,77 @@ public class chessPlayer {
                 currentBoard.selectedCell=null;
             }
             else if(current.attackedBy.contains(currentBoard.selectedCell)){
-                if (currentBoard.playerBlue != playerType.ai && currentBoard.playerYellow != playerType.ai)
-                    updatePreviousBoardStates();
                 unsetMovable(currentBoard.selectedCell);
 		doMove(currentBoard.selectedCell, current);
+                currentBoard.selectedCell.setBaseColor();
+                current.setBaseColor();
                 currentBoard.pieceSelected=false;
                 currentBoard.selectedCell=null;
-                setValidMoves();
-                detectCheck();
+                
                 if (currentBoard.mate){
-                    if ((currentBoard.currentTurn==pieceColor.blue?currentBoard.isCheckOnBlue:currentBoard.isCheckOnYellow))
-                        JOptionPane.showMessageDialog(null,"CheckMate detected on " + currentBoard.currentTurn.toString());
-                    else
-                        JOptionPane.showMessageDialog(null,"StaleMate detected on " + currentBoard.currentTurn.toString());
+                    if (currentBoard.isCheckOnBlue){
+                        JOptionPane.showMessageDialog(null,"CheckMate detected on " + "blue");
+                    }
+                    else{
+                        String a = currentBoard.currentTurn.name();
+                        JOptionPane.showMessageDialog(null,"StaleMate detected on " + "yellow");
+                    }
                 }
                 else if(currentBoard.isCheckOnYellow)
                     JOptionPane.showMessageDialog(null,"Yellow in check");
                 else if(currentBoard.isCheckOnBlue)
                     JOptionPane.showMessageDialog(null,"Blue in check");
-                resetColors();
+                
+                if (currentBoard.playerBlue != playerType.ai && currentBoard.playerYellow != playerType.ai)
+                    updatePreviousBoardStates();
             }
         } else{
             currentBoard.pieceSelected=true;
             currentBoard.selectedCell=current;
             setMovableSelected(current);
+            
+                if (currentBoard.mate){
+                    if (currentBoard.isCheckOnBlue){
+                        JOptionPane.showMessageDialog(null,"CheckMate detected on " + "blue");
+                    }
+                    else{
+                        String a = currentBoard.currentTurn.name();
+                        JOptionPane.showMessageDialog(null,"StaleMate detected on " + "yellow");
+                    }
+                }
+                else if(currentBoard.isCheckOnYellow)
+                    JOptionPane.showMessageDialog(null,"Yellow in check");
+                else if(currentBoard.isCheckOnBlue)
+                    JOptionPane.showMessageDialog(null,"Blue in check");
         }
     }
     final  void moveHandler(cell from, cell to){
-        updatePreviousBoardStates();
 	doMove(from, to);
-        setValidMoves();
-        detectCheck();
-        if (currentBoard.mate){
-            if ((currentBoard.currentTurn==pieceColor.blue?currentBoard.isCheckOnBlue:currentBoard.isCheckOnYellow)){
-                String a = currentBoard.currentTurn.name();
-                stopGame();
-                JOptionPane.showMessageDialog(null,"CheckMate detected on " + a);
-            }
-            else{
-                String a = currentBoard.currentTurn.name();
-                stopGame();
-                JOptionPane.showMessageDialog(null,"StaleMate detected on " + a);
-            }
-        }
-        else if(currentBoard.isCheckOnYellow)
-            JOptionPane.showMessageDialog(null,"Yellow in check");
-        else if(currentBoard.isCheckOnBlue)
-            JOptionPane.showMessageDialog(null,"Blue in check");
-        resetColors();
+        
+        from.setBaseColor();
+        to.setBaseColor();
+        updatePreviousBoardStates();
     }
     final void doMove(cell moveFrom, cell moveTo){
+        
+        testMove(moveFrom, moveTo);
+        
+                setValidMoves();
+                detectCheck();
+        if (currentBoard.mate){
+            stopGame();
+            return;
+        }
+        
+        if (currentBoard.currentTurn == pieceColor.blue) {
+            currentBoard.currentTurn  = pieceColor.yellow;                    
+        } else {
+            currentBoard.currentTurn  = pieceColor.blue;
+        }
+        currentBoard.moveNumber++;
+    }
+    
+    final void testMove(cell moveFrom, cell moveTo){
         specialAction action = wasSpecialAction(moveTo, moveFrom);
         moveTo.currentPiece = moveFrom.currentPiece;
         
@@ -262,12 +283,6 @@ public class chessPlayer {
                 
         if (action!=null)   action.postClick();
         
-        if (currentBoard.currentTurn == pieceColor.blue) {
-            currentBoard.currentTurn  = pieceColor.yellow;                    
-        } else {
-            currentBoard.currentTurn  = pieceColor.blue;
-        }
-        currentBoard.moveNumber++;
         calculateAttacks();
     }
     

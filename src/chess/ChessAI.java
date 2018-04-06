@@ -48,7 +48,6 @@ public class ChessAI extends Thread {
         else{
             chessPlayer temp = current.AI;
             cell[][] tempBoard;
-            current.setValidMoves();
             if(isMaximisingPlayer) {
                 double bestMove = -9999.0;
                 
