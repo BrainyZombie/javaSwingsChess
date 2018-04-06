@@ -24,7 +24,7 @@ public class ChessAiHandler extends Thread{
         candidateMove[] moveList;
         candidateMove bestMove;
         int numMoves = 0;
-    ChessAiHandler(pieceColor c, chessPlayer main, int depth, int numThreads){
+        ChessAiHandler(pieceColor c, chessPlayer main, int depth, int numThreads){
         moveOn = c;
         mainPlayer=main;
         this.depth = depth;
@@ -34,7 +34,6 @@ public class ChessAiHandler extends Thread{
         
         chessPlayerCreator[] temp = new chessPlayerCreator[numThreads];
         for (int i=0;i<numThreads;i++){
-            System.out.println("y");
             (temp[i] = new chessPlayerCreator(threadPlayer, mainPlayer, i, depth)).start();
         }
         for (int i=0;i<numThreads; i++){
@@ -48,7 +47,7 @@ public class ChessAiHandler extends Thread{
     public void run (){
         while (true){
             try {
-                sleep(500);
+                sleep(1000);
             } catch (InterruptedException ex) {
                 Logger.getLogger(ChessAI.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -63,8 +62,10 @@ public class ChessAiHandler extends Thread{
         moveList = new candidateMove[numThreads];
         bestMove = new candidateMove();
         bestMove.score=-9999;
+        mainPlayer.calculateAttacks();
         for (int i=0;i<numThreads;i++){
             moveList[i] = new candidateMove();
+            moveList[i].score = -9999.0;
         }
         for (cell[] j:mainPlayer.currentBoard.cellGrid){
             for (cell k: j){
@@ -86,14 +87,13 @@ public class ChessAiHandler extends Thread{
             }
         }
                 threads();
-        if (bestMove.from==null){System.out.println("eh??");    return;}
-        mainPlayer.moveHandler(mainPlayer.currentBoard.cellGrid[bestMove.from.posY][bestMove.from.posX]);
+        mainPlayer.currentBoard.cellGrid[bestMove.to.posY][bestMove.to.posX].setMovableSelectedColor();
+        mainPlayer.currentBoard.cellGrid[bestMove.from.posY][bestMove.from.posX].setMovableUnselectedColor();
         try {
                 sleep(700);
             } catch (InterruptedException ex) {
             }
-        mainPlayer.moveHandler(mainPlayer.currentBoard.cellGrid[bestMove.to.posY][bestMove.to.posX]);
-        mainPlayer.currentBoard.cellGrid[bestMove.to.posY][bestMove.to.posX].setBaseColor();
+        mainPlayer.moveHandler(mainPlayer.currentBoard.cellGrid[bestMove.from.posY][bestMove.from.posX], mainPlayer.currentBoard.cellGrid[bestMove.to.posY][bestMove.to.posX]);
         System.gc();
     }
     
@@ -106,16 +106,22 @@ public class ChessAiHandler extends Thread{
                         catch (InterruptedException ex) {
                                 Logger.getLogger(ChessAiHandler.class.getName()).log(Level.SEVERE, null, ex);
                         }
-//                                System.out.println("            "+bestMove.score);
-                        for (int m=1; m<numMoves; m++){
-                                System.out.println("            "+bestMove.score+"  "+ moveList[m].score);
+                        for (int m=0; m<numMoves; m++){
                             if (bestMove.score<=moveList[m].score){
                                 bestMove.from = moveList[m].from;
                                 bestMove.to = moveList[m].to;
                                 bestMove.score = moveList[m].score;
                             }
                         }
-//                        System.out.println(bestMove.score);
+                        if (bestMove.from==null){
+                            for (int m=0; m<numMoves; m++){
+                            if (bestMove.score<=moveList[m].score){
+                                bestMove.from = moveList[m].from;
+                                bestMove.to = moveList[m].to;
+                                bestMove.score = moveList[m].score;
+                            }
+                        }
+                        }
     }
 }
 

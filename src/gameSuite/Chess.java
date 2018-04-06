@@ -4,9 +4,9 @@
  * and open the template in the editor.
  */
 package gameSuite;
-import chess.chessBoard;
-import javax.swing.JFrame;
-
+import chess.Menu;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 
 /**
  *
@@ -18,13 +18,12 @@ public class Chess {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
-        JFrame window = new JFrame("Chess");
-        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        window.setResizable(false);
-        window.add(new chessBoard(200));
-        window.pack();
-        window.setVisible(true);
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        double width = screenSize.getWidth();
+        double height = screenSize.getHeight();
+        double size = Math.min(width, height);
+        size /= 10;
+        Menu menu = new Menu((int)size);
     }
     
 }

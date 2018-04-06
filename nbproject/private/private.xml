@@ -8,8 +8,11 @@
             <file>file:/E:/Projects/SE%20project%20chess/chesSS/src/chess/chessPiece.java</file>
             <file>file:/E:/Projects/SE%20project%20chess/chesSS/src/chess/chessPlayer.java</file>
             <file>file:/E:/Projects/SE%20project%20chess/chesSS/src/chess/chessBoard.java</file>
+            <file>file:/E:/Projects/SE%20project%20chess/chesSS/src/gameSuite/Chess.java</file>
             <file>file:/E:/Projects/SE%20project%20chess/chesSS/src/chess/ChessAI.java</file>
             <file>file:/E:/Projects/SE%20project%20chess/chesSS/src/chess/boardState.java</file>
+            <file>file:/E:/Projects/SE%20project%20chess/chesSS/src/chess/cell.java</file>
+            <file>file:/E:/Projects/SE%20project%20chess/chesSS/src/chess/moveTracker.java</file>
         </group>
     </open-files>
 </project-private>

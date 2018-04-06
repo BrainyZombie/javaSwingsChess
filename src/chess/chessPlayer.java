@@ -17,6 +17,7 @@ public class chessPlayer {
     public boardState currentBoard;
     chessPlayer testBoard;
     chessPlayer AI;
+    moveTracker tracker;
     
     chessPlayer(boardState board, boolean createTestBoard, int AIDepth){
         currentBoard = board;
@@ -42,6 +43,7 @@ public class chessPlayer {
                 });
             }
         }
+        calculateAttacks();
     }
     
     
@@ -55,9 +57,8 @@ public class chessPlayer {
                 JOptionPane.showMessageDialog(null,"It is " + currentBoard.currentTurn.name()+"'s turn");
                 return;
             }
-           else if (current.attacking==null){
+           else if (current.attacking.isEmpty()){
                 current.setBaseColor();
-                JOptionPane.showMessageDialog(null,"This piece has no valid moves");
                 return;                        
             }
             else{
@@ -198,11 +199,10 @@ public class chessPlayer {
                 currentBoard.selectedCell=null;
             }
             else if(current.attackedBy.contains(currentBoard.selectedCell)){
-                
+                if (currentBoard.playerBlue != playerType.ai && currentBoard.playerYellow != playerType.ai)
+                    updatePreviousBoardStates();
                 unsetMovable(currentBoard.selectedCell);
 		doMove(currentBoard.selectedCell, current);
-                currentBoard.selectedCell.setBaseColor();
-                current.setHoverInvalidColor();
                 currentBoard.pieceSelected=false;
                 currentBoard.selectedCell=null;
                 setValidMoves();
@@ -217,6 +217,7 @@ public class chessPlayer {
                     JOptionPane.showMessageDialog(null,"Yellow in check");
                 else if(currentBoard.isCheckOnBlue)
                     JOptionPane.showMessageDialog(null,"Blue in check");
+                resetColors();
             }
         } else{
             currentBoard.pieceSelected=true;
@@ -224,7 +225,29 @@ public class chessPlayer {
             setMovableSelected(current);
         }
     }
-    
+    final  void moveHandler(cell from, cell to){
+        updatePreviousBoardStates();
+	doMove(from, to);
+        setValidMoves();
+        detectCheck();
+        if (currentBoard.mate){
+            if ((currentBoard.currentTurn==pieceColor.blue?currentBoard.isCheckOnBlue:currentBoard.isCheckOnYellow)){
+                String a = currentBoard.currentTurn.name();
+                stopGame();
+                JOptionPane.showMessageDialog(null,"CheckMate detected on " + a);
+            }
+            else{
+                String a = currentBoard.currentTurn.name();
+                stopGame();
+                JOptionPane.showMessageDialog(null,"StaleMate detected on " + a);
+            }
+        }
+        else if(currentBoard.isCheckOnYellow)
+            JOptionPane.showMessageDialog(null,"Yellow in check");
+        else if(currentBoard.isCheckOnBlue)
+            JOptionPane.showMessageDialog(null,"Blue in check");
+        resetColors();
+    }
     final void doMove(cell moveFrom, cell moveTo){
         specialAction action = wasSpecialAction(moveTo, moveFrom);
         moveTo.currentPiece = moveFrom.currentPiece;
@@ -303,5 +326,13 @@ public class chessPlayer {
                 j.setBaseColor();
             }
         }
+    }
+    
+    final void updatePreviousBoardStates(){
+            tracker.addBoard(currentBoard);
+    }
+    
+    final void stopGame(){
+        currentBoard.currentTurn = pieceColor.NULL;
     }
 }

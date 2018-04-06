@@ -13,18 +13,22 @@ package chess;
 import java.awt.GridLayout;
 import javax.swing.JPanel;
 import java.util.ArrayList;
+import javax.swing.JButton;
 
 public class chessBoard extends JPanel{ 
     
-    private boardState mainBoard;
-    private chessPlayer mainBoardHandler;
+    boardState mainBoard;
+    private chessPlayer mainPlayer;
     ChessAiHandler blueAI;
     ChessAiHandler yellowAI;
     int AIDepth = 3;
+    int aiThread = 4;
     public chessBoard(int cellSize) {
-        mainBoard = new boardState(cellSize, playerType.human, playerType.ai);
-        mainBoardHandler = new chessPlayer(mainBoard, true, 0);
-        GridLayout grid = new GridLayout(8,8,0,0);
+        mainBoard = new boardState(cellSize, playerType.ai, playerType.ai);
+        mainPlayer = new chessPlayer(mainBoard, true, 0);
+        mainPlayer.tracker = new moveTracker(mainBoard);
+        mainPlayer.tracker.start();
+        GridLayout grid = new GridLayout(8,9,0,0);
         this.setLayout(grid);
         
         for (int i=0;i<8;i++){
@@ -32,13 +36,52 @@ public class chessBoard extends JPanel{
                 this.add(mainBoard.cellGrid[i][j]);
                 setButtonConfig(mainBoard.cellGrid[i][j]);
             }
+            JButton temp = new JButton();
+            this.add (temp);
+            if (i<4){
+                temp.addMouseListener(new java.awt.event.MouseAdapter() {
+                    @Override
+                    public void mousePressed(java.awt.event.MouseEvent evt){
+                        doUndo();
+                        System.out.println("undo");
+                        mainPlayer.resetColors();
+                    }
+                });
+            }
+            else{
+                
+                temp.addMouseListener(new java.awt.event.MouseAdapter() {
+                    @Override
+                    public void mousePressed(java.awt.event.MouseEvent evt){
+                        doRedo();
+                        System.out.println("redo");
+                        mainPlayer.resetColors();
+                    }
+                });
+            }
         }
-        mainBoardHandler.calculateAttacks();
-        mainBoardHandler.setValidMoves();
-        yellowAI = new ChessAiHandler(pieceColor.yellow, mainBoardHandler, AIDepth, 4);
+        yellowAI = new ChessAiHandler(pieceColor.yellow, mainPlayer, AIDepth, aiThread);
+        blueAI = new ChessAiHandler(pieceColor.blue, mainPlayer, AIDepth, aiThread);
+        blueAI.start();
         yellowAI.start();
         this.setVisible(true);
     }   
+    
+    
+    final boolean doUndo(){
+        if (mainPlayer.tracker.currentBoard.previous == null)
+            return false;
+        mainBoard.duplicate(mainPlayer.tracker.currentBoard.previous);
+        mainPlayer.tracker.currentBoard = mainPlayer.tracker.currentBoard.previous;
+        return true;
+    }
+    final boolean doRedo(){
+        if (mainPlayer.tracker.currentBoard.next == null)
+            return false;
+        mainBoard.duplicate(mainPlayer.tracker.currentBoard.next);
+        mainPlayer.tracker.currentBoard = mainPlayer.tracker.currentBoard.next;
+        return true;
+    }
     
     final void setButtonConfig(cell current){
         current.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -48,7 +91,7 @@ public class chessBoard extends JPanel{
                     if (current.currentPiece==null) {
                         current.setHoverColor();
                     } else if (current.currentPiece.pieceC == mainBoard.currentTurn) {
-                        if (mainBoardHandler.setMovableUnselected(current)!=0) {
+                        if (mainPlayer.setMovableUnselected(current)!=0) {
                             current.setHoverColor();
                         } else {
                             current.setHoverInvalidColor();
@@ -64,7 +107,7 @@ public class chessBoard extends JPanel{
                     current.setBaseColor();
                     if (current.currentPiece!=null){
                         if (current.currentPiece.pieceC == mainBoard.currentTurn) {
-                            mainBoardHandler.unsetMovable(current);
+                            mainPlayer.unsetMovable(current);
                         }
                     }
                 }

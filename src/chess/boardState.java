@@ -23,6 +23,8 @@ public class boardState {
     protected boolean isCheckOnYellow = false;
     protected boolean mate = false;
     protected int moveNumber = 0;
+    protected boardState next = null, previous = null;
+    int boardNumber =0;
     
     boardState(int cellSize, playerType player1, playerType player2){
         playerBlue = player1;
@@ -32,6 +34,7 @@ public class boardState {
                 cellGrid[i][j] = new cell(j, i, cellSize, this);
             }
         }
+        currentTurn = pieceColor.blue;
         setInitialConfig();
     }
     
@@ -44,6 +47,9 @@ public class boardState {
         playerBlue = previousBoard.playerBlue;
         playerYellow = previousBoard.playerYellow;
         selectedCell = null;
+        previous = previousBoard.previous;
+        next = previousBoard.next;
+        boardNumber = previousBoard.boardNumber;
         
         for (int i=0;i<8;i++){
             for (int j=0;j<8;j++){
@@ -60,7 +66,7 @@ public class boardState {
     
     
     final void setInitialConfig(){
-        for (int i=0;i<8;i++){
+         for (int i=0;i<8;i++){
             cellGrid[1][i].setPiece(new pawn(pieceColor.yellow, cellGrid[1][i]));
             cellGrid[6][i].setPiece(new pawn(pieceColor.blue, cellGrid[6][i]));
         }

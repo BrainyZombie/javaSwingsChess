@@ -38,8 +38,6 @@ public class ChessAI extends Thread {
         moveStore.score = minimax(temp, depth-1, -10000.0, 10000.0, !isMaximisingPlayer);
         moveStore.from=from;
         moveStore.to=to;
-        dispBoard(tempBoard);
-        System.out.println(moveStore.score);
     }
     
     private double minimax(chessPlayer current, int depth, double alpha, double beta, boolean isMaximisingPlayer){
@@ -100,7 +98,7 @@ public class ChessAI extends Thread {
                                 k.currentPiece = null;
                                 i.currentPiece.setCell(i);
                                 
-                                bestMove = Math.max(bestMove, -evalBoard(current));
+                                bestMove = Math.min(bestMove, evalBoard(current));
                                 
                                 k.currentPiece = i.currentPiece;
                                 i.currentPiece = null;
@@ -127,50 +125,38 @@ public class ChessAI extends Thread {
     private double evalBoard(chessPlayer current) {
         double value = 0.0;
         cell[][] game = current.currentBoard.cellGrid;
+        pieceColor currTurn = current.currentBoard.currentTurn;
         for(cell i[] : game)
             for(cell j: i)
                 if(j.currentPiece != null)
-                    value += getPieceValue(j.currentPiece.pieceC, j.currentPiece.pieceT, j.posX, j.posY);
+                    value += getPieceValue(j.currentPiece.pieceC, j.currentPiece.pieceT, j.posX, j.posY, currTurn);
         return value;
             
     }
     
-    // dev
-    final synchronized void dispBoard(cell[][] game) {
-        for(int i = 0; i < game.length; i++) {
-            for(int j = 0; j < game.length; j++) {
-                if(game[i][j].currentPiece != null)
-                    System.out.print("" + game[i][j].currentPiece.pieceT.toString().charAt(0) + "\t");
-                else System.out.print("____\t");
-            }
-            System.out.println();
-        }
-        System.out.println();
-    }
-    
-    final double getPieceValue(pieceColor color, pieceType type, int x, int y) {
+    final double getPieceValue(pieceColor color, pieceType type, int x, int y, pieceColor currTurn) {
         double value = 0.0;
         switch(type) {
             case pawn:
-                value += 10 + (color == pieceColor.blue ? PawnTable[x * 8 + y] : PawnTable[63 - x * 8 - y]);
+                value += 10 + (color != currTurn ? PawnTable[x * 8 + y] : PawnTable[63 - x * 8 - y]);
                 break;
             case rook:
-                value += 50 + (color == pieceColor.blue ? RookTable[x * 8 + y] : RookTable[63 - x * 8 - y]);
+                value += 50 + (color != currTurn ? RookTable[x * 8 + y] : RookTable[63 - x * 8 - y]);
                 break;
             case knight:
-                value += 30 + (color == pieceColor.blue ? KnightTable[x * 8 + y] : KnightTable[63 - x * 8 - y]);
+                value += 30 + (color != currTurn ? KnightTable[x * 8 + y] : KnightTable[63 - x * 8 - y]);
                 break;
             case bishop:
-                value += 30 + (color == pieceColor.blue ? BishopTable[x * 8 + y] : BishopTable[63 - x * 8 - y]);
+                value += 30 + (color != currTurn ? BishopTable[x * 8 + y] : BishopTable[63 - x * 8 - y]);
                 break;
             case queen:
-                value += 90 + (color == pieceColor.blue ? QueenTable[x * 8 + y] : QueenTable[63 - x * 8 - y]);
+                value += 90 + (color != currTurn ? QueenTable[x * 8 + y] : QueenTable[63 - x * 8 - y]);
                 break;
             case king:
-                value += 900 + (color == pieceColor.blue ? KingTable[x * 8 + y] : KingTable[63 - x * 8 - y]);
+                value += 900 + (color != currTurn ? KingTable[x * 8 + y] : KingTable[63 - x * 8 - y]);
                 break;
         }
-        return color == pieceColor.blue ? value : -value; 
+        return color != currTurn ? value : -value; 
     }
 
     private static double[] PawnTable = new double[]
